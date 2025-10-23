@@ -53,7 +53,10 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> 
                 auth.requestMatchers("/api/auth/**").permitAll()
-                    .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**").permitAll()
+                    .requestMatchers("/", "/login", "/register").permitAll()
+                    .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
+                    .requestMatchers("/WEB-INF/views/**").permitAll()
+                    .requestMatchers("/error").permitAll()
                     .requestMatchers("/api/admin/**").hasRole("ADMIN")
                     .requestMatchers("/api/instructor/**").hasAnyRole("ADMIN", "INSTRUCTOR")
                     .requestMatchers("/api/student/**").hasAnyRole("ADMIN", "INSTRUCTOR", "STUDENT")
