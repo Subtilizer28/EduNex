@@ -47,4 +47,14 @@ public class ViewController {
     public String profile() {
         return "profile";
     }
+    
+    @GetMapping("/assignments")
+    public String assignments() {
+        return "assignments";
+    }
+    
+    @GetMapping("/quizzes")
+    public String quizzes() {
+        return "quizzes";
+    }
 }
