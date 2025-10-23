@@ -1,0 +1,174 @@
+# Git Ignore File for EduNex LMS
+
+# ===================================
+# Compiled Files
+# ===================================
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# ===================================
+# Maven
+# ===================================
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# ===================================
+# Gradle
+# ===================================
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# ===================================
+# IDE Files
+# ===================================
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+.idea_modules/
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.loadpath
+.recommenders
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# ===================================
+# Operating System Files
+# ===================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# ===================================
+# Environment & Configuration
+# ===================================
+.env
+.env.local
+.env.production
+application-local.properties
+application-prod.properties
+
+# ===================================
+# Logs
+# ===================================
+*.log
+logs/
+log/
+*.log.*
+
+# ===================================
+# Uploads & User Data
+# ===================================
+uploads/
+files/
+attachments/
+
+# ===================================
+# Spring Boot
+# ===================================
+spring-boot-devtools.properties
+HELP.md
+
+# ===================================
+# Database
+# ===================================
+*.db
+*.sqlite
+*.sqlite3
+
+# ===================================
+# Testing
+# ===================================
+*.coveragexml
+.coverage
+htmlcov/
+.tox/
+.pytest_cache/
+
+# ===================================
+# Documentation Build
+# ===================================
+docs/_build/
+site/
+
+# ===================================
+# Temporary Files
+# ===================================
+*.cache
+*.pid
+*.seed
+*.pid.lock
+.npm
+.node_repl_history
+
+# ===================================
+# Security
+# ===================================
+# Never commit sensitive data
+*.pem
+*.key
+*.cert
+credentials.json
+secrets.yml
+
+# ===================================
+# Package Files
+# ===================================
+node_modules/
+jspm_packages/
+
+# ===================================
+# Backup Files
+# ===================================
+*.backup
+*.back
+*.old
