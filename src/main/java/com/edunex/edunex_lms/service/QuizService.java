@@ -26,7 +26,7 @@ public class QuizService {
             .orElseThrow(() -> new RuntimeException("Course not found"));
         
         quiz.setCourse(course);
-        quiz.setActive(true);
+        quiz.setIsActive(true);
         return quizRepository.save(quiz);
     }
     
@@ -65,8 +65,9 @@ public class QuizService {
         QuizAttempt attempt = new QuizAttempt();
         attempt.setQuiz(quiz);
         attempt.setStudent(student);
-        attempt.setStartTime(now);
+        attempt.setStartedAt(now);
         attempt.setAttemptNumber((int) attemptCount + 1);
+        attempt.setStatus(QuizAttempt.AttemptStatus.IN_PROGRESS);
         
         return quizAttemptRepository.save(attempt);
     }
@@ -76,7 +77,8 @@ public class QuizService {
         QuizAttempt attempt = quizAttemptRepository.findById(attemptId)
             .orElseThrow(() -> new RuntimeException("Quiz attempt not found"));
         
-        attempt.setEndTime(LocalDateTime.now());
+        attempt.setSubmittedAt(LocalDateTime.now());
+        attempt.setStatus(QuizAttempt.AttemptStatus.SUBMITTED);
         
         // Save all answers
         for (Answer answer : answers) {
@@ -96,32 +98,39 @@ public class QuizService {
             .orElseThrow(() -> new RuntimeException("Quiz attempt not found"));
         
         List<Answer> answers = answerRepository.findByQuizAttemptId(attemptId);
-        double totalScore = 0.0;
-        double maxScore = 0.0;
+        int totalScore = 0;
+        int maxScore = 0;
         
         for (Answer answer : answers) {
             Question question = answer.getQuestion();
             maxScore += question.getMarks();
             
             // Auto-grade MCQ and True/False
-            if (question.getType().equals("MCQ") || question.getType().equals("TRUE_FALSE")) {
-                if (answer.getAnswerText().equalsIgnoreCase(question.getCorrectAnswer())) {
-                    answer.setMarksObtained(question.getMarks());
+            if (question.getQuestionType() == Question.QuestionType.MCQ || 
+                question.getQuestionType() == Question.QuestionType.TRUE_FALSE) {
+                if (answer.getStudentAnswer() != null && 
+                    answer.getStudentAnswer().equalsIgnoreCase(question.getCorrectAnswer())) {
+                    answer.setIsCorrect(true);
+                    answer.setMarksAwarded(question.getMarks());
                     totalScore += question.getMarks();
                 } else {
-                    answer.setMarksObtained(0.0);
+                    answer.setIsCorrect(false);
+                    answer.setMarksAwarded(0);
                 }
                 answerRepository.save(answer);
             }
         }
         
-        attempt.setScore(totalScore);
+        attempt.setMarksObtained(totalScore);
+        attempt.setTotalMarks(maxScore);
         
         // Calculate percentage
         if (maxScore > 0) {
-            double percentage = (totalScore / maxScore) * 100;
-            attempt.setScore(percentage);
+            double percentage = ((double) totalScore / maxScore) * 100;
+            attempt.setPercentage(percentage);
         }
+        
+        attempt.setStatus(QuizAttempt.AttemptStatus.GRADED);
         
         return quizAttemptRepository.save(attempt);
     }
@@ -131,7 +140,7 @@ public class QuizService {
     }
     
     public List<Quiz> getAvailableQuizzes(Long courseId) {
-        return quizRepository.findByCourseIdAndActiveTrue(courseId);
+        return quizRepository.findActiveByCourseId(courseId);
     }
     
     public Quiz getQuizById(Long quizId) {
@@ -140,6 +149,6 @@ public class QuizService {
     }
     
     public List<Question> getQuizQuestions(Long quizId) {
-        return questionRepository.findByQuizIdOrderByQuestionNumberAsc(quizId);
+        return questionRepository.findByQuizIdOrderByQuestionOrderAsc(quizId);
     }
 }

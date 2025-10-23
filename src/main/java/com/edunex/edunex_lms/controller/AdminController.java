@@ -32,7 +32,8 @@ public class AdminController {
     
     @GetMapping("/users/role/{role}")
     public ResponseEntity<List<User>> getUsersByRole(@PathVariable String role) {
-        List<User> users = userRepository.findByRole(role);
+        User.Role userRole = User.Role.valueOf(role.toUpperCase());
+        List<User> users = userRepository.findByRole(userRole);
         return ResponseEntity.ok(users);
     }
     
@@ -40,7 +41,7 @@ public class AdminController {
     public ResponseEntity<User> activateUser(@PathVariable Long id) {
         User user = userRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("User not found"));
-        user.setActive(true);
+        user.setEnabled(true);
         userRepository.save(user);
         return ResponseEntity.ok(user);
     }
@@ -49,7 +50,7 @@ public class AdminController {
     public ResponseEntity<User> deactivateUser(@PathVariable Long id) {
         User user = userRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("User not found"));
-        user.setActive(false);
+        user.setEnabled(false);
         userRepository.save(user);
         return ResponseEntity.ok(user);
     }
@@ -63,9 +64,9 @@ public class AdminController {
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getSystemStats() {
         long totalUsers = userRepository.count();
-        long students = userRepository.findByRole("STUDENT").size();
-        long instructors = userRepository.findByRole("INSTRUCTOR").size();
-        long admins = userRepository.findByRole("ADMIN").size();
+        long students = userRepository.findByRole(User.Role.STUDENT).size();
+        long instructors = userRepository.findByRole(User.Role.INSTRUCTOR).size();
+        long admins = userRepository.findByRole(User.Role.ADMIN).size();
         
         Map<String, Object> stats = Map.of(
             "totalUsers", totalUsers,

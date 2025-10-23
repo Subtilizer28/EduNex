@@ -33,7 +33,7 @@ public class AssignmentService {
             .orElseThrow(() -> new RuntimeException("Course not found"));
         
         assignment.setCourse(course);
-        assignment.setStatus("PUBLISHED");
+        assignment.setStatus(Assignment.SubmissionStatus.PENDING);
         return assignmentRepository.save(assignment);
     }
     
@@ -43,14 +43,14 @@ public class AssignmentService {
             .orElseThrow(() -> new RuntimeException("Assignment not found"));
         
         if (LocalDateTime.now().isAfter(assignment.getDueDate())) {
-            assignment.setStatus("LATE");
+            assignment.setStatus(Assignment.SubmissionStatus.LATE_SUBMISSION);
         } else {
-            assignment.setStatus("SUBMITTED");
+            assignment.setStatus(Assignment.SubmissionStatus.SUBMITTED);
         }
         
         // Save file
         String fileName = saveFile(file, assignmentId, studentId);
-        assignment.setSubmissionFile(fileName);
+        assignment.setSubmissionUrl(fileName);
         assignment.setSubmittedAt(LocalDateTime.now());
         
         return assignmentRepository.save(assignment);
@@ -65,9 +65,9 @@ public class AssignmentService {
             throw new RuntimeException("Invalid grade");
         }
         
-        assignment.setMarksObtained(grade);
+        assignment.setMarksObtained(grade.intValue());
         assignment.setFeedback(feedback);
-        assignment.setStatus("GRADED");
+        assignment.setStatus(Assignment.SubmissionStatus.GRADED);
         
         return assignmentRepository.save(assignment);
     }
@@ -82,7 +82,10 @@ public class AssignmentService {
     }
     
     public List<Assignment> getPendingAssignments(Long courseId) {
-        return assignmentRepository.findByCourseIdAndStatus(courseId, "PUBLISHED");
+        return assignmentRepository.findByCourseId(courseId).stream()
+            .filter(a -> a.getStatus() == Assignment.SubmissionStatus.PENDING ||
+                        a.getStatus() == Assignment.SubmissionStatus.SUBMITTED)
+            .toList();
     }
     
     private String saveFile(MultipartFile file, Long assignmentId, Long studentId) {

@@ -41,8 +41,6 @@ public class CourseService {
         course.setDescription(updatedCourse.getDescription());
         course.setCredits(updatedCourse.getCredits());
         course.setMaxStudents(updatedCourse.getMaxStudents());
-        course.setStartDate(updatedCourse.getStartDate());
-        course.setEndDate(updatedCourse.getEndDate());
         
         return courseRepository.save(course);
     }
@@ -68,10 +66,15 @@ public class CourseService {
     }
     
     public List<Course> getAvailableCourses() {
-        return courseRepository.findByStartDateAfter(LocalDate.now());
+        return courseRepository.findAll().stream()
+            .filter(Course::getIsActive)
+            .toList();
     }
     
     public List<Course> searchCourses(String keyword) {
-        return courseRepository.findByCourseNameContainingOrCourseCodeContaining(keyword, keyword);
+        return courseRepository.findAll().stream()
+            .filter(c -> c.getCourseName().toLowerCase().contains(keyword.toLowerCase()) ||
+                        c.getCourseCode().toLowerCase().contains(keyword.toLowerCase()))
+            .toList();
     }
 }

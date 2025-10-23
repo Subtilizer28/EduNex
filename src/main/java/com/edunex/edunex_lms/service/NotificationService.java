@@ -27,8 +27,8 @@ public class NotificationService {
         notification.setUser(user);
         notification.setTitle(title);
         notification.setMessage(message);
-        notification.setType(type);
-        notification.setRead(false);
+        notification.setType(Notification.NotificationType.valueOf(type.toUpperCase()));
+        notification.setIsRead(false);
         notification.setCreatedAt(LocalDateTime.now());
         
         return notificationRepository.save(notification);
@@ -44,14 +44,17 @@ public class NotificationService {
         Notification notification = notificationRepository.findById(notificationId)
             .orElseThrow(() -> new RuntimeException("Notification not found"));
         
-        notification.setRead(true);
+        notification.setIsRead(true);
         return notificationRepository.save(notification);
     }
     
     @Transactional
     public void markAllAsRead(Long userId) {
-        List<Notification> notifications = notificationRepository.findByUserIdAndReadFalse(userId);
-        notifications.forEach(n -> n.setRead(true));
+        List<Notification> notifications = notificationRepository.findByUserIdOrderByCreatedAtDesc(userId)
+            .stream()
+            .filter(n -> !n.getIsRead())
+            .toList();
+        notifications.forEach(n -> n.setIsRead(true));
         notificationRepository.saveAll(notifications);
     }
     
@@ -60,7 +63,10 @@ public class NotificationService {
     }
     
     public List<Notification> getUnreadNotifications(Long userId) {
-        return notificationRepository.findByUserIdAndReadFalse(userId);
+        return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId)
+            .stream()
+            .filter(n -> !n.getIsRead())
+            .toList();
     }
     
     @Transactional

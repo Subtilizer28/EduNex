@@ -32,15 +32,15 @@ public class AttendanceService {
         LocalDate today = LocalDate.now();
         
         // Check if attendance already marked today
-        if (attendanceRepository.findByStudentIdAndCourseIdAndDate(studentId, courseId, today).isPresent()) {
+        if (attendanceRepository.findByStudentIdAndCourseIdAndAttendanceDate(studentId, courseId, today).isPresent()) {
             throw new RuntimeException("Attendance already marked for today");
         }
         
         Attendance attendance = new Attendance();
         attendance.setStudent(student);
         attendance.setCourse(course);
-        attendance.setDate(today);
-        attendance.setStatus(status);
+        attendance.setAttendanceDate(today);
+        attendance.setStatus(Attendance.AttendanceStatus.valueOf(status.toUpperCase()));
         
         return attendanceRepository.save(attendance);
     }

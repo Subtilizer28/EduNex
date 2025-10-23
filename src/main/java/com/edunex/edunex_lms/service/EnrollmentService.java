@@ -39,7 +39,7 @@ public class EnrollmentService {
         }
         
         // Check max students
-        long currentEnrollments = enrollmentRepository.countByCourseId(courseId);
+        long currentEnrollments = enrollmentRepository.countActiveByCourseId(courseId);
         if (currentEnrollments >= course.getMaxStudents()) {
             throw new RuntimeException("Course is full");
         }
