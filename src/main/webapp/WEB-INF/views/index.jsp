@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome - EduNex LMS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -16,8 +17,7 @@
                 <li><a href="/">Home</a></li>
                 <li><a href="#features">Features</a></li>
                 <li><a href="#about">About</a></li>
-                <li><a href="/login" class="btn btn-outline">Login</a></li>
-                <li><a href="/register" class="btn btn-primary">Register</a></li>
+                <li><a href="/login" class="btn btn-primary">Login</a></li>
             </ul>
             <div class="hamburger">
                 <span></span>
@@ -36,8 +36,7 @@
                 Manage courses, track attendance, take quizzes, and analyze performance all in one place.
             </p>
             <div class="hero-buttons">
-                <a href="/register" class="btn btn-primary btn-large">Get Started</a>
-                <a href="/login" class="btn btn-outline btn-large">Sign In</a>
+                <a href="/login" class="btn btn-primary btn-large">Sign In</a>
             </div>
         </div>
     </section>

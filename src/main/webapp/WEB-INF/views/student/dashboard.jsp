@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard - EduNex</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -17,14 +18,14 @@
             </div>
             
             <ul class="sidebar-menu">
-                <li><a href="/student/dashboard" class="active">📊 Dashboard</a></li>
-                <li><a href="/student/courses">📚 My Courses</a></li>
-                <li><a href="/student/assignments">✍️ Assignments</a></li>
-                <li><a href="/student/quizzes">📝 Quizzes</a></li>
-                <li><a href="/student/attendance">📅 Attendance</a></li>
-                <li><a href="/student/grades">🎯 Grades</a></li>
-                <li><a href="/profile">👤 Profile</a></li>
-                <li><a href="#" onclick="EduNex.logout()">🚪 Logout</a></li>
+                <li><a href="/student/dashboard" class="active"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+                <li><a href="/courses"><i class="fas fa-book"></i> My Courses</a></li>
+                <li><a href="/assignments"><i class="fas fa-tasks"></i> Assignments</a></li>
+                <li><a href="/quizzes"><i class="fas fa-clipboard-check"></i> Quizzes</a></li>
+                <li><a href="/student/dashboard"><i class="fas fa-calendar-check"></i> Attendance</a></li>
+                <li><a href="/student/dashboard"><i class="fas fa-trophy"></i> Grades</a></li>
+                <li><a href="/profile"><i class="fas fa-user"></i> Profile</a></li>
+                <li><a href="#" onclick="EduNex.logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
         </aside>
         
@@ -72,7 +73,7 @@
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">My Courses</h3>
-                    <a href="/student/courses" class="btn btn-primary">View All</a>
+                    <a href="/courses" class="btn btn-primary">View All</a>
                 </div>
                 <div class="table-responsive">
                     <table>

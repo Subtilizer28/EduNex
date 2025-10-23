@@ -52,8 +52,11 @@ public class SecurityConfig {
             .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> 
-                auth.requestMatchers("/api/auth/**").permitAll()
-                    .requestMatchers("/", "/login", "/register").permitAll()
+                auth.requestMatchers("/api/auth/login").permitAll()
+                    .requestMatchers("/api/auth/register").hasRole("ADMIN")
+                    .requestMatchers("/", "/login").permitAll()
+                    .requestMatchers("/student/**", "/instructor/**", "/admin/**").permitAll()
+                    .requestMatchers("/courses", "/assignments", "/quizzes", "/profile").permitAll()
                     .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
                     .requestMatchers("/WEB-INF/views/**").permitAll()
                     .requestMatchers("/error").permitAll()
