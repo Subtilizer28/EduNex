@@ -7,7 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +21,7 @@ public class QuizService {
     private final AnswerRepository answerRepository;
     private final CourseRepository courseRepository;
     private final UserRepository userRepository;
+    private final EnrollmentRepository enrollmentRepository;
     
     @Transactional
     public Quiz createQuiz(Quiz quiz, Long courseId) {
@@ -150,5 +153,28 @@ public class QuizService {
     
     public List<Question> getQuizQuestions(Long quizId) {
         return questionRepository.findByQuizIdOrderByQuestionOrderAsc(quizId);
+    }
+    
+    public List<Quiz> getAvailableQuizzesForUser(Long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        // Get user's enrolled courses
+        List<Enrollment> enrollments = enrollmentRepository.findByStudentId(userId);
+        List<Long> courseIds = enrollments.stream()
+            .map(e -> e.getCourse().getId())
+            .collect(Collectors.toList());
+        
+        // Get active quizzes from those courses
+        List<Quiz> quizzes = new ArrayList<>();
+        for (Long courseId : courseIds) {
+            quizzes.addAll(quizRepository.findActiveByCourseId(courseId));
+        }
+        
+        return quizzes;
+    }
+    
+    public List<QuizAttempt> getUserAttempts(Long quizId, Long userId) {
+        return quizAttemptRepository.findByQuizIdAndStudentId(quizId, userId);
     }
 }

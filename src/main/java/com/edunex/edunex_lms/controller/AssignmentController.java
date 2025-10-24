@@ -1,10 +1,13 @@
 package com.edunex.edunex_lms.controller;
 
 import com.edunex.edunex_lms.entity.Assignment;
+import com.edunex.edunex_lms.entity.User;
 import com.edunex.edunex_lms.service.AssignmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -60,6 +63,16 @@ public class AssignmentController {
     @GetMapping("/course/{courseId}/pending")
     public ResponseEntity<List<Assignment>> getPendingAssignments(@PathVariable Long courseId) {
         List<Assignment> assignments = assignmentService.getPendingAssignments(courseId);
+        return ResponseEntity.ok(assignments);
+    }
+    
+    @GetMapping("/my-assignments")
+    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR', 'ADMIN')")
+    public ResponseEntity<List<Assignment>> getMyAssignments(@AuthenticationPrincipal UserDetails userDetails) {
+        // This will return assignments based on user role
+        // For students: their enrolled courses' assignments
+        // For instructors: assignments from their courses
+        List<Assignment> assignments = assignmentService.getUserAssignments(userDetails.getUsername());
         return ResponseEntity.ok(assignments);
     }
 }

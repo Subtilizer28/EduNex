@@ -1,13 +1,13 @@
 package com.edunex.edunex_lms.controller;
 
-import com.edunex.edunex_lms.entity.Answer;
-import com.edunex.edunex_lms.entity.Question;
-import com.edunex.edunex_lms.entity.Quiz;
-import com.edunex.edunex_lms.entity.QuizAttempt;
+import com.edunex.edunex_lms.entity.*;
+import com.edunex.edunex_lms.repository.UserRepository;
 import com.edunex.edunex_lms.service.QuizService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +18,7 @@ import java.util.List;
 public class QuizController {
     
     private final QuizService quizService;
+    private final UserRepository userRepository;
     
     @PostMapping
     @PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")
@@ -79,5 +80,25 @@ public class QuizController {
     public ResponseEntity<List<Question>> getQuizQuestions(@PathVariable Long quizId) {
         List<Question> questions = quizService.getQuizQuestions(quizId);
         return ResponseEntity.ok(questions);
+    }
+    
+    @GetMapping("/available")
+    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR', 'ADMIN')")
+    public ResponseEntity<List<Quiz>> getAvailableQuizzesForUser(@AuthenticationPrincipal UserDetails userDetails) {
+        User user = userRepository.findByUsername(userDetails.getUsername())
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        List<Quiz> quizzes = quizService.getAvailableQuizzesForUser(user.getId());
+        return ResponseEntity.ok(quizzes);
+    }
+    
+    @GetMapping("/{quizId}/my-attempts")
+    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR', 'ADMIN')")
+    public ResponseEntity<List<QuizAttempt>> getMyAttempts(
+            @PathVariable Long quizId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        User user = userRepository.findByUsername(userDetails.getUsername())
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        List<QuizAttempt> attempts = quizService.getUserAttempts(quizId, user.getId());
+        return ResponseEntity.ok(attempts);
     }
 }

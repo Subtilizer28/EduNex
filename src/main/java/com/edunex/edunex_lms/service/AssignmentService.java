@@ -2,8 +2,12 @@ package com.edunex.edunex_lms.service;
 
 import com.edunex.edunex_lms.entity.Assignment;
 import com.edunex.edunex_lms.entity.Course;
+import com.edunex.edunex_lms.entity.Enrollment;
+import com.edunex.edunex_lms.entity.User;
 import com.edunex.edunex_lms.repository.AssignmentRepository;
 import com.edunex.edunex_lms.repository.CourseRepository;
+import com.edunex.edunex_lms.repository.EnrollmentRepository;
+import com.edunex.edunex_lms.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,8 +19,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +30,8 @@ public class AssignmentService {
     
     private final AssignmentRepository assignmentRepository;
     private final CourseRepository courseRepository;
+    private final UserRepository userRepository;
+    private final EnrollmentRepository enrollmentRepository;
     
     private static final String UPLOAD_DIR = "uploads/assignments/";
     
@@ -103,6 +111,36 @@ public class AssignmentService {
             return filePath.toString();
         } catch (IOException e) {
             throw new RuntimeException("Failed to save file: " + e.getMessage());
+        }
+    }
+    
+    public List<Assignment> getUserAssignments(String username) {
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        if (user.getRole() == User.Role.STUDENT) {
+            // Get assignments from enrolled courses
+            List<Enrollment> enrollments = enrollmentRepository.findByStudentId(user.getId());
+            List<Long> courseIds = enrollments.stream()
+                .map(e -> e.getCourse().getId())
+                .collect(Collectors.toList());
+            
+            List<Assignment> assignments = new ArrayList<>();
+            for (Long courseId : courseIds) {
+                assignments.addAll(assignmentRepository.findByCourseId(courseId));
+            }
+            return assignments;
+        } else if (user.getRole() == User.Role.INSTRUCTOR) {
+            // Get assignments from instructor's courses
+            List<Course> courses = courseRepository.findByInstructorId(user.getId());
+            List<Assignment> assignments = new ArrayList<>();
+            for (Course course : courses) {
+                assignments.addAll(assignmentRepository.findByCourseId(course.getId()));
+            }
+            return assignments;
+        } else {
+            // Admin gets all assignments
+            return assignmentRepository.findAll();
         }
     }
 }
