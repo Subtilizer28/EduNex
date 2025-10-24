@@ -23,6 +23,21 @@ public class ViewController {
         return "admin/dashboard";
     }
     
+    @GetMapping("/admin/users")
+    public String adminUsers() {
+        return "admin/users";
+    }
+    
+    @GetMapping("/admin/courses")
+    public String adminCourses() {
+        return "admin/courses";
+    }
+    
+    @GetMapping("/admin/reports")
+    public String adminReports() {
+        return "admin/reports";
+    }
+    
     @GetMapping("/instructor/dashboard")
     public String instructorDashboard() {
         return "instructor/dashboard";

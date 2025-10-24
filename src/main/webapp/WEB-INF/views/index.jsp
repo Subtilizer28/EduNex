@@ -46,34 +46,46 @@
             <h2>Key Features</h2>
             <div class="features-grid">
                 <div class="feature-card">
-                    <div class="feature-icon">📚</div>
+                    <div class="feature-icon">
+                        <i class="fas fa-book-open" style="color: var(--primary-color);"></i>
+                    </div>
                     <h3>Course Management</h3>
-                    <p>Create, manage, and organize courses with multimedia content</p>
+                    <p>Create, manage, and organize courses with multimedia content and interactive materials</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">✍️</div>
+                    <div class="feature-icon">
+                        <i class="fas fa-clipboard-check" style="color: var(--success-color);"></i>
+                    </div>
                     <h3>Assignments & Quizzes</h3>
-                    <p>Create interactive assessments with automatic grading</p>
+                    <p>Create interactive assessments with automatic grading and instant feedback</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">📊</div>
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line" style="color: var(--info-color);"></i>
+                    </div>
                     <h3>Analytics & Reports</h3>
-                    <p>Track performance with detailed charts and insights</p>
+                    <p>Track performance with detailed charts, insights, and progress monitoring</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">📅</div>
+                    <div class="feature-icon">
+                        <i class="fas fa-calendar-check" style="color: var(--warning-color);"></i>
+                    </div>
                     <h3>Attendance Tracking</h3>
-                    <p>Monitor and manage student attendance effortlessly</p>
+                    <p>Monitor and manage student attendance effortlessly with smart tracking</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">🔒</div>
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt" style="color: var(--danger-color);"></i>
+                    </div>
                     <h3>Secure & Scalable</h3>
-                    <p>Role-based access with JWT authentication</p>
+                    <p>Role-based access control with JWT authentication and enterprise security</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">🤖</div>
+                    <div class="feature-icon">
+                        <i class="fas fa-brain" style="color: #8B5CF6;"></i>
+                    </div>
                     <h3>AI-Powered (Optional)</h3>
-                    <p>Get AI-generated quizzes and personalized recommendations</p>
+                    <p>Get AI-generated quizzes, personalized recommendations, and smart insights</p>
                 </div>
             </div>
         </div>
@@ -96,6 +108,7 @@
         </div>
     </footer>
     
+    <script src="/js/theme.js"></script>
     <script src="/js/main.js"></script>
 </body>
 </html>

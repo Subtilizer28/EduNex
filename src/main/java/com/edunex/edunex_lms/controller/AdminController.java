@@ -1,8 +1,13 @@
 package com.edunex.edunex_lms.controller;
 
 import com.edunex.edunex_lms.entity.Attendance;
+import com.edunex.edunex_lms.entity.Course;
 import com.edunex.edunex_lms.entity.Notification;
 import com.edunex.edunex_lms.entity.User;
+import com.edunex.edunex_lms.repository.AssignmentRepository;
+import com.edunex.edunex_lms.repository.CourseRepository;
+import com.edunex.edunex_lms.repository.EnrollmentRepository;
+import com.edunex.edunex_lms.repository.QuizRepository;
 import com.edunex.edunex_lms.repository.UserRepository;
 import com.edunex.edunex_lms.service.AttendanceService;
 import com.edunex.edunex_lms.service.NotificationService;
@@ -34,6 +39,10 @@ import java.util.Map;
 public class AdminController {
     
     private final UserRepository userRepository;
+    private final CourseRepository courseRepository;
+    private final EnrollmentRepository enrollmentRepository;
+    private final AssignmentRepository assignmentRepository;
+    private final QuizRepository quizRepository;
     private final AttendanceService attendanceService;
     private final NotificationService notificationService;
     private final PasswordEncoder passwordEncoder;
@@ -77,19 +86,71 @@ public class AdminController {
     
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getSystemStats() {
-        long totalUsers = userRepository.count();
-        long students = userRepository.findByRole(User.Role.STUDENT).size();
-        long instructors = userRepository.findByRole(User.Role.INSTRUCTOR).size();
-        long admins = userRepository.findByRole(User.Role.ADMIN).size();
-        
-        Map<String, Object> stats = Map.of(
-            "totalUsers", totalUsers,
-            "students", students,
-            "instructors", instructors,
-            "admins", admins
-        );
-        
-        return ResponseEntity.ok(stats);
+        try {
+            long totalUsers = userRepository.count();
+            long students = userRepository.findByRole(User.Role.STUDENT).size();
+            long instructors = userRepository.findByRole(User.Role.INSTRUCTOR).size();
+            long admins = userRepository.findByRole(User.Role.ADMIN).size();
+            long totalCourses = courseRepository.count();
+            long totalEnrollments = enrollmentRepository.count();
+            long totalAssignments = assignmentRepository.count();
+            long totalQuizzes = quizRepository.count();
+            
+            Map<String, Object> stats = new HashMap<>();
+            stats.put("totalUsers", totalUsers);
+            stats.put("students", students);
+            stats.put("instructors", instructors);
+            stats.put("admins", admins);
+            stats.put("totalCourses", totalCourses);
+            stats.put("totalEnrollments", totalEnrollments);
+            stats.put("totalAssignments", totalAssignments);
+            stats.put("totalQuizzes", totalQuizzes);
+            
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            log.error("Error loading stats", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Failed to load statistics: " + e.getMessage()));
+        }
+    }
+    
+    @GetMapping("/courses")
+    public ResponseEntity<List<Course>> getAllCourses() {
+        try {
+            List<Course> courses = courseRepository.findAll();
+            return ResponseEntity.ok(courses);
+        } catch (Exception e) {
+            log.error("Error loading courses", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    
+    @GetMapping("/reports/overview")
+    public ResponseEntity<Map<String, Object>> getReportsOverview() {
+        try {
+            Map<String, Object> report = new HashMap<>();
+            
+            // User statistics
+            report.put("totalUsers", userRepository.count());
+            report.put("activeUsers", userRepository.findByEnabled(true).size());
+            report.put("inactiveUsers", userRepository.findByEnabled(false).size());
+            
+            // Course statistics
+            report.put("totalCourses", courseRepository.count());
+            report.put("totalEnrollments", enrollmentRepository.count());
+            
+            // Assignment statistics  
+            report.put("totalAssignments", assignmentRepository.count());
+            
+            // Quiz statistics
+            report.put("totalQuizzes", quizRepository.count());
+            
+            return ResponseEntity.ok(report);
+        } catch (Exception e) {
+            log.error("Error generating reports", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Failed to generate reports: " + e.getMessage()));
+        }
     }
     
     @PostMapping("/notifications/broadcast")

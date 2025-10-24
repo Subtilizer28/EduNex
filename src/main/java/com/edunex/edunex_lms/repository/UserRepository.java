@@ -21,6 +21,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     
     List<User> findByRole(User.Role role);
     
+    List<User> findByEnabled(boolean enabled);
+    
     List<User> findByEnabledTrue();
     
     @Query("SELECT u FROM User u WHERE u.role = :role AND u.enabled = true")
