@@ -72,7 +72,7 @@ function logout() {
 }
 
 // API Helper Function
-async function fetchAPI(endpoint, options = {}) {
+async function apiCall(endpoint, options = {}) {
     const token = localStorage.getItem('token');
     
     const defaultOptions = {
@@ -96,21 +96,55 @@ async function fetchAPI(endpoint, options = {}) {
         
         // Handle unauthorized
         if (response.status === 401) {
+            console.error('Unauthorized - redirecting to login');
             logout();
-            return null;
+            throw new Error('Unauthorized');
         }
         
-        return response;
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        return await response.json();
     } catch (error) {
         console.error('API Error:', error);
         throw error;
     }
 }
 
+// Legacy alias for backward compatibility
+async function fetchAPI(endpoint, options = {}) {
+    return apiCall(endpoint, options);
+}
+
 // Get Current User
 function getCurrentUser() {
     const userStr = localStorage.getItem('user');
     return userStr ? JSON.parse(userStr) : null;
+}
+
+// Check Authentication
+function checkAuth() {
+    const token = localStorage.getItem('token');
+    const user = getCurrentUser();
+    
+    if (!token || !user) {
+        window.location.href = '/login';
+        return false;
+    }
+    
+    return true;
+}
+
+// Redirect to Dashboard based on role
+function redirectToDashboard(role) {
+    const dashboards = {
+        'ADMIN': '/admin/dashboard',
+        'INSTRUCTOR': '/instructor/dashboard',
+        'STUDENT': '/student/dashboard'
+    };
+    
+    window.location.href = dashboards[role] || '/login';
 }
 
 // Format Date

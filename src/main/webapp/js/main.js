@@ -105,7 +105,7 @@ async function apiCall(endpoint, options = {}) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        return response;
+        return await response.json();
     } catch (error) {
         console.error('API Error:', error);
         throw error;
