@@ -19,7 +19,6 @@
                 <li><a href="/courses">Courses</a></li>
                 <li><a href="/assignments" class="active">Assignments</a></li>
                 <li><a href="/quizzes">Quizzes</a></li>
-                <li><a href="#" class="theme-toggle" onclick="toggleTheme()">🌙</a></li>
                 <li><a href="#" onclick="logout()">Logout</a></li>
             </ul>
         </div>

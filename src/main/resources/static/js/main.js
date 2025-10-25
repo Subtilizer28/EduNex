@@ -36,23 +36,55 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// Dark Mode Toggle
+// Dark Mode Toggle (shadcn style)
 function toggleDarkMode() {
     const currentTheme = document.documentElement.getAttribute('data-theme');
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
     
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
+    updateThemeIcon();
+}
+
+// Alias for backwards compatibility
+function toggleTheme() {
+    toggleDarkMode();
+}
+
+// Update theme toggle icon
+function updateThemeIcon() {
+    const themeToggle = document.getElementById('themeToggle');
+    if (!themeToggle) return;
+    
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const icon = themeToggle.querySelector('i');
+    
+    if (icon) {
+        if (currentTheme === 'dark') {
+            icon.className = 'fas fa-sun theme-icon theme-icon-light';
+        } else {
+            icon.className = 'fas fa-moon theme-icon theme-icon-dark';
+        }
+    }
 }
 
 // Load saved theme
 function loadTheme() {
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeIcon();
 }
 
 // Initialize theme on page load
-document.addEventListener('DOMContentLoaded', loadTheme);
+document.addEventListener('DOMContentLoaded', () => {
+    loadTheme();
+    
+    // Add theme toggle listener
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', toggleDarkMode);
+    }
+});
 
 // Sidebar Toggle for Mobile
 const sidebarToggle = document.querySelector('.sidebar-toggle');

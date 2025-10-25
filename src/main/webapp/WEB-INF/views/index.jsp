@@ -10,9 +10,7 @@
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <div class="nav-brand">
-                <h1>EduNex</h1>
-            </div>
+            <a href="/" class="nav-logo">EduNex</a>
             <ul class="nav-menu">
                 <li><a href="/">Home</a></li>
                 <li><a href="#features">Features</a></li>
@@ -47,42 +45,42 @@
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-book-open" style="color: var(--primary-color);"></i>
+                        <i class="fas fa-book-open"></i>
                     </div>
                     <h3>Course Management</h3>
                     <p>Create, manage, and organize courses with multimedia content and interactive materials</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-clipboard-check" style="color: var(--success-color);"></i>
+                        <i class="fas fa-clipboard-check"></i>
                     </div>
                     <h3>Assignments & Quizzes</h3>
                     <p>Create interactive assessments with automatic grading and instant feedback</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-chart-line" style="color: var(--info-color);"></i>
+                        <i class="fas fa-chart-line"></i>
                     </div>
                     <h3>Analytics & Reports</h3>
                     <p>Track performance with detailed charts, insights, and progress monitoring</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-calendar-check" style="color: var(--warning-color);"></i>
+                        <i class="fas fa-calendar-check"></i>
                     </div>
                     <h3>Attendance Tracking</h3>
                     <p>Monitor and manage student attendance effortlessly with smart tracking</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-shield-alt" style="color: var(--danger-color);"></i>
+                        <i class="fas fa-shield-alt"></i>
                     </div>
                     <h3>Secure & Scalable</h3>
                     <p>Role-based access control with JWT authentication and enterprise security</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-brain" style="color: #8B5CF6;"></i>
+                        <i class="fas fa-brain"></i>
                     </div>
                     <h3>AI-Powered (Optional)</h3>
                     <p>Get AI-generated quizzes, personalized recommendations, and smart insights</p>
@@ -108,7 +106,6 @@
         </div>
     </footer>
     
-    <script src="/js/theme.js"></script>
     <script src="/js/main.js"></script>
 </body>
 </html>

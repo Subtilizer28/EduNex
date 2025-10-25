@@ -11,19 +11,16 @@
 </head>
 <body>
     <nav class="navbar">
-        <div class="container nav-container">
-            <a href="/" class="logo">EduNex</a>
+        <div class="nav-container">
+            <a href="/" class="nav-logo">EduNex</a>
             <ul class="nav-menu">
-                <li><a href="/admin/dashboard" class="active">Dashboard</a></li>
-                <li><a href="/admin/users">Users</a></li>
-                <li><a href="/admin/courses">Courses</a></li>
-                <li><a href="/admin/reports">Reports</a></li>
-                <li><a href="/profile">Profile</a></li>
-                <li><a href="#" id="logoutBtn">Logout</a></li>
+                <li class="nav-item"><a href="/admin/dashboard" class="nav-link active">Dashboard</a></li>
+                <li class="nav-item"><a href="/admin/users" class="nav-link">Users</a></li>
+                <li class="nav-item"><a href="/admin/courses" class="nav-link">Courses</a></li>
+                <li class="nav-item"><a href="/admin/reports" class="nav-link">Reports</a></li>
+                <li class="nav-item"><a href="/profile" class="nav-link">Profile</a></li>
+                <li class="nav-item"><a href="#" id="logoutBtn" class="nav-link">Logout</a></li>
             </ul>
-            <button class="theme-toggle" id="themeToggle">
-                <span class="theme-icon">🌙</span>
-            </button>
         </div>
     </nav>
 

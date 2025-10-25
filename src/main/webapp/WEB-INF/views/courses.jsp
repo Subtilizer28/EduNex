@@ -20,9 +20,6 @@
                 <li><a href="/profile">Profile</a></li>
                 <li><a href="#" id="logoutBtn">Logout</a></li>
             </ul>
-            <button class="theme-toggle" id="themeToggle">
-                <span class="theme-icon">🌙</span>
-            </button>
         </div>
     </nav>
 
