@@ -18,6 +18,27 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
     
+    private Notification.NotificationType resolveType(String rawType) {
+        if (rawType == null) return Notification.NotificationType.ANNOUNCEMENT;
+        String t = rawType.trim().toUpperCase();
+        try {
+            // Try exact match with defined enum first
+            return Notification.NotificationType.valueOf(t);
+        } catch (IllegalArgumentException ex) {
+            // Graceful mapping from generic UI terms to our enum
+            switch (t) {
+                case "INFO":
+                case "SUCCESS":
+                    return Notification.NotificationType.ANNOUNCEMENT;
+                case "WARNING":
+                case "ERROR":
+                    return Notification.NotificationType.SYSTEM;
+                default:
+                    return Notification.NotificationType.ANNOUNCEMENT;
+            }
+        }
+    }
+
     @Transactional
     public Notification createNotification(Long userId, String title, String message, String type) {
         User user = userRepository.findById(userId)
@@ -27,7 +48,7 @@ public class NotificationService {
         notification.setUser(user);
         notification.setTitle(title);
         notification.setMessage(message);
-        notification.setType(Notification.NotificationType.valueOf(type.toUpperCase()));
+        notification.setType(resolveType(type));
         notification.setIsRead(false);
         notification.setCreatedAt(LocalDateTime.now());
         

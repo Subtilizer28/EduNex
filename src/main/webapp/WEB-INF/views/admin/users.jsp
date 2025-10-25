@@ -10,10 +10,7 @@
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <a href="/" class="nav-logo">
-                <i class="fas fa-graduation-cap"></i>
-                EduNex
-            </a>
+            <a href="/" class="nav-logo">EduNex</a>
             <ul class="nav-menu">
                 <li class="nav-item">
                     <a href="/admin/dashboard" class="nav-link">
@@ -46,6 +43,11 @@
                     </a>
                 </li>
             </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
         </div>
     </nav>
 

@@ -137,6 +137,13 @@ async function apiCall(endpoint, options = {}) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
+        // Gracefully handle empty responses or non-JSON bodies
+        const contentType = response.headers.get('content-type') || '';
+        if (response.status === 204 || contentType.indexOf('application/json') === -1) {
+            const text = await response.text();
+            return text ? JSON.parse(text) : { ok: true };
+        }
+        
         return await response.json();
     } catch (error) {
         console.error('API Error:', error);
@@ -297,3 +304,39 @@ window.EduNex = {
     smoothScrollTo,
     validateFile
 };
+
+// Lightweight Notifications Polling (shows toast for new unread notifications)
+function startNotificationPolling() {
+    const user = getCurrentUser();
+    const token = localStorage.getItem('token');
+    if (!user || !token) return;
+
+    const key = `lastNotifId:${user.id}`;
+    let lastSeenId = parseInt(localStorage.getItem(key) || '0', 10);
+
+    async function poll() {
+        try {
+            const unread = await apiCall(`/api/notifications/user/${user.id}/unread`);
+            if (Array.isArray(unread) && unread.length) {
+                // Sort by id ascending and show only new ones
+                unread.sort((a, b) => (a.id || 0) - (b.id || 0));
+                const newOnes = unread.filter(n => (n.id || 0) > lastSeenId);
+                newOnes.forEach(n => {
+                    const prefix = n.title ? `${n.title}: ` : '';
+                    const type = (n.type || 'INFO').toString().toLowerCase();
+                    showToast(prefix + (n.message || ''), type === 'error' ? 'error' : type);
+                    if (n.id && n.id > lastSeenId) lastSeenId = n.id;
+                });
+                localStorage.setItem(key, String(lastSeenId));
+            }
+        } catch (e) {
+            // Silent fail to avoid noisy UI if API is down
+        }
+    }
+
+    // Prime once quickly, then every 30s
+    poll();
+    setInterval(poll, 30000);
+}
+
+document.addEventListener('DOMContentLoaded', startNotificationPolling);
