@@ -11,15 +11,20 @@
 </head>
 <body>
     <nav class="navbar">
-        <div class="container nav-container">
-            <a href="/" class="logo">EduNex</a>
+        <div class="nav-container">
+            <a href="/" class="nav-logo">EduNex</a>
             <ul class="nav-menu">
-                <li><a href="/">Home</a></li>
-                <li><a href="/courses" class="active">Courses</a></li>
-                <li><a href="/student/dashboard">Dashboard</a></li>
-                <li><a href="/profile">Profile</a></li>
-                <li><a href="#" id="logoutBtn">Logout</a></li>
+                <li class="nav-item"><a href="/" class="nav-link">Home</a></li>
+                <li class="nav-item"><a href="/courses" class="nav-link active">Courses</a></li>
+                <li class="nav-item"><a href="/student/dashboard" class="nav-link">Dashboard</a></li>
+                <li class="nav-item"><a href="/profile" class="nav-link">Profile</a></li>
+                <li class="nav-item"><a href="#" id="logoutBtn" class="nav-link">Logout</a></li>
             </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
         </div>
     </nav>
 

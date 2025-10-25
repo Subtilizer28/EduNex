@@ -21,6 +21,11 @@
                 <li class="nav-item"><a href="/profile" class="nav-link">Profile</a></li>
                 <li class="nav-item"><a href="#" id="logoutBtn" class="nav-link">Logout</a></li>
             </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
         </div>
     </nav>
 
@@ -190,10 +195,13 @@
                 <div class="form-group">
                     <label for="notifType">Type</label>
                     <select id="notifType" name="type" required>
-                        <option value="INFO">Information</option>
-                        <option value="WARNING">Warning</option>
-                        <option value="SUCCESS">Success</option>
-                        <option value="ERROR">Error</option>
+                        <option value="ANNOUNCEMENT" selected>Announcement</option>
+                        <option value="SYSTEM">System</option>
+                        <option value="COURSE_UPDATE">Course Update</option>
+                        <option value="ASSIGNMENT">Assignment</option>
+                        <option value="QUIZ">Quiz</option>
+                        <option value="GRADE">Grade</option>
+                        <option value="ATTENDANCE">Attendance</option>
                     </select>
                 </div>
                 <button type="submit" class="btn btn-primary">Send to All Users</button>
