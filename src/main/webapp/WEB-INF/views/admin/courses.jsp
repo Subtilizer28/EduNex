@@ -13,36 +13,12 @@
         <div class="nav-container">
             <a href="/" class="nav-logo">EduNex</a>
             <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="/admin/dashboard" class="nav-link">
-                        <i class="fas fa-chart-line"></i> Dashboard
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="/admin/users" class="nav-link">
-                        <i class="fas fa-users"></i> Users
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="/admin/courses" class="nav-link active">
-                        <i class="fas fa-book"></i> Courses
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="/admin/reports" class="nav-link">
-                        <i class="fas fa-chart-bar"></i> Reports
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="/profile" class="nav-link">
-                        <i class="fas fa-user"></i> Profile
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link" onclick="logout()">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </a>
-                </li>
+                <li class="nav-item"><a href="/admin/dashboard" class="nav-link"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+                <li class="nav-item"><a href="/admin/users" class="nav-link"><i class="fas fa-users"></i> Users</a></li>
+                <li class="nav-item"><a href="/admin/courses" class="nav-link active"><i class="fas fa-book"></i> Courses</a></li>
+                <li class="nav-item"><a href="/admin/reports" class="nav-link"><i class="fas fa-chart-bar"></i> Reports</a></li>
+                <li class="nav-item"><a href="/profile" class="nav-link"><i class="fas fa-user"></i> Profile</a></li>
+                <li class="nav-item"><a href="#" id="logoutBtn" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
             <div class="hamburger">
                 <span></span>

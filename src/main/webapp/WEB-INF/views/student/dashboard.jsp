@@ -9,35 +9,31 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="dashboard">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-brand">
-                <h2>EduNex</h2>
-                <p id="userFullName"></p>
-            </div>
-            
-            <ul class="sidebar-menu">
-                <li><a href="/student/dashboard" class="active"><i class="fas fa-chart-line"></i> Dashboard</a></li>
-                <li><a href="/courses"><i class="fas fa-book"></i> My Courses</a></li>
-                <li><a href="/assignments"><i class="fas fa-tasks"></i> Assignments</a></li>
-                <li><a href="/quizzes"><i class="fas fa-clipboard-check"></i> Quizzes</a></li>
-                <li><a href="/student/dashboard"><i class="fas fa-calendar-check"></i> Attendance</a></li>
-                <li><a href="/student/dashboard"><i class="fas fa-trophy"></i> Grades</a></li>
-                <li><a href="/profile"><i class="fas fa-user"></i> Profile</a></li>
-                <li><a href="#" onclick="EduNex.logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">EduNex</a>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="/student/dashboard" class="nav-link active"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+                <li class="nav-item"><a href="/courses" class="nav-link"><i class="fas fa-book"></i> Courses</a></li>
+                <li class="nav-item"><a href="/assignments" class="nav-link"><i class="fas fa-tasks"></i> Assignments</a></li>
+                <li class="nav-item"><a href="/quizzes" class="nav-link"><i class="fas fa-clipboard-check"></i> Quizzes</a></li>
+                <li class="nav-item"><a href="/profile" class="nav-link"><i class="fas fa-user"></i> Profile</a></li>
+                <li class="nav-item"><a href="#" id="logoutBtn" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
-        </aside>
-        
-        <!-- Main Content -->
-        <main class="main-content">
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard">
+        <div class="container">
             <div class="dashboard-header">
                 <div>
                     <h1>Student Dashboard</h1>
                     <p>Welcome back, <span id="userName"></span>!</p>
-                </div>
-                <div>
-                    <button class="btn btn-outline" onclick="EduNex.toggleDarkMode()">🌙 Dark Mode</button>
                 </div>
             </div>
             
@@ -128,8 +124,8 @@
                 </div>
                 <p id="aiStatusMessage">Checking AI availability...</p>
             </div>
-        </main>
-    </div>
+        </div>
+    </main>
     
     <script src="/js/main.js"></script>
     <script src="/js/student-dashboard.js"></script>

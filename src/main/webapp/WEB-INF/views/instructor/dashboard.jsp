@@ -11,15 +11,21 @@
 </head>
 <body>
     <nav class="navbar">
-        <div class="container nav-container">
-            <a href="/" class="logo">EduNex</a>
+        <div class="nav-container">
+            <a href="/" class="nav-logo">EduNex</a>
             <ul class="nav-menu">
-                <li><a href="/instructor/dashboard" class="active">Dashboard</a></li>
-                <li><a href="/instructor/courses">My Courses</a></li>
-                <li><a href="/instructor/students">Students</a></li>
-                <li><a href="/profile">Profile</a></li>
-                <li><a href="#" id="logoutBtn">Logout</a></li>
+                <li class="nav-item"><a href="/instructor/dashboard" class="nav-link active"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+                <li class="nav-item"><a href="/courses" class="nav-link"><i class="fas fa-book"></i> Courses</a></li>
+                <li class="nav-item"><a href="/assignments" class="nav-link"><i class="fas fa-tasks"></i> Assignments</a></li>
+                <li class="nav-item"><a href="/quizzes" class="nav-link"><i class="fas fa-clipboard-check"></i> Quizzes</a></li>
+                <li class="nav-item"><a href="/profile" class="nav-link"><i class="fas fa-user"></i> Profile</a></li>
+                <li class="nav-item"><a href="#" id="logoutBtn" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
         </div>
     </nav>
 

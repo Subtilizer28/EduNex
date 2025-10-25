@@ -12,10 +12,10 @@
         <div class="nav-container">
             <a href="/" class="nav-logo">EduNex</a>
             <ul class="nav-menu">
-                <li><a href="/">Home</a></li>
-                <li><a href="#features">Features</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="/login" class="btn btn-primary">Login</a></li>
+                <li class="nav-item"><a href="/" class="nav-link active"><i class="fas fa-home"></i> Home</a></li>
+                <li class="nav-item"><a href="#features" class="nav-link"><i class="fas fa-star"></i> Features</a></li>
+                <li class="nav-item"><a href="#about" class="nav-link"><i class="fas fa-info-circle"></i> About</a></li>
+                <li class="nav-item"><a href="/login" class="nav-link"><i class="fas fa-sign-in-alt"></i> Login</a></li>
             </ul>
             <div class="hamburger">
                 <span></span>
