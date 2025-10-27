@@ -1,5 +1,6 @@
 package com.edunex.edunex_lms.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -28,6 +29,7 @@ public class User {
     @Column(unique = true, nullable = false, length = 50)
     private String username;
     
+    @JsonIgnore
     @NotBlank(message = "Password is required")
     @Column(nullable = false)
     private String password;
@@ -66,15 +68,19 @@ public class User {
     private LocalDateTime updatedAt;
     
     // Relationships
+    @JsonIgnore
     @OneToMany(mappedBy = "instructor", cascade = CascadeType.ALL)
     private List<Course> coursesTeaching = new ArrayList<>();
     
+    @JsonIgnore
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     private List<Enrollment> enrollments = new ArrayList<>();
     
+    @JsonIgnore
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     private List<Assignment> assignments = new ArrayList<>();
     
+    @JsonIgnore
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     private List<QuizAttempt> quizAttempts = new ArrayList<>();
     

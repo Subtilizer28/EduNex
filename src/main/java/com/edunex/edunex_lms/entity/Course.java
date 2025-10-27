@@ -1,5 +1,7 @@
 package com.edunex.edunex_lms.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -49,7 +51,8 @@ public class Course {
     @Column(nullable = false)
     private Boolean isActive = true;
     
-    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"coursesTeaching", "enrollments", "assignments", "quizAttempts", "password"})
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "instructor_id", nullable = false)
     private User instructor;
     
@@ -62,18 +65,23 @@ public class Course {
     private LocalDateTime updatedAt;
     
     // Relationships
+    @JsonIgnore
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Enrollment> enrollments = new ArrayList<>();
     
+    @JsonIgnore
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Assignment> assignments = new ArrayList<>();
     
+    @JsonIgnore
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Quiz> quizzes = new ArrayList<>();
     
+    @JsonIgnore
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Attendance> attendances = new ArrayList<>();
     
+    @JsonIgnore
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CourseMaterial> materials = new ArrayList<>();
 }
