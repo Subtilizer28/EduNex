@@ -53,18 +53,19 @@ async function loadRecentUsers() {
         tbody.innerHTML = '';
         
         users.slice(0, 10).forEach(user => {
+            const isEnabled = user.enabled === true || user.enabled === 'true';
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${user.fullName}</td>
                 <td>${user.email}</td>
-                <td><span class="badge badge-info">${user.role}</span></td>
+                <td><span class="badge badge-${user.role.toLowerCase()}">${user.role}</span></td>
                 <td>
-                    <span class="badge ${user.active ? 'badge-success' : 'badge-danger'}">
-                        ${user.active ? 'Active' : 'Inactive'}
+                    <span class="badge ${isEnabled ? 'badge-success' : 'badge-danger'}">
+                        ${isEnabled ? 'Active' : 'Inactive'}
                     </span>
                 </td>
-                <td>
-                    ${user.active 
+                <td class="action-buttons">
+                    ${isEnabled 
                         ? `<button class="btn btn-sm btn-warning" onclick="deactivateUser(${user.id})">Deactivate</button>`
                         : `<button class="btn btn-sm btn-success" onclick="activateUser(${user.id})">Activate</button>`
                     }
