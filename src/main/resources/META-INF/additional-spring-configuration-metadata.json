@@ -1,0 +1,44 @@
+{
+    "properties": [
+        {
+            "name": "spring.ai.openai.api-key",
+            "type": "java.lang.String",
+            "description": "API key for the OpenAI service used by the Spring AI integration; keep this value secret."
+        },
+        {
+            "name": "spring.ai.openai.chat.options.model",
+            "type": "java.lang.String",
+            "description": "Identifier of the OpenAI model to use for chat requests (e.g., gpt-4, gpt-4o, gpt-3.5-turbo)."
+        },
+        {
+            "name": "spring.ai.openai.chat.options.temperature",
+            "type": "java.lang.String",
+            "description": "Sampling temperature for model responses; a numeric value (typically 0.0–1.0) controlling randomness."
+        },
+        {
+            "name": "jwt.secret",
+            "type": "java.lang.String",
+            "description": "Secret key used to sign and verify JWT tokens; must be stored securely and not exposed."
+        },
+        {
+            "name": "jwt.expiration",
+            "type": "java.lang.String",
+            "description": "Duration or timestamp after which JWT tokens expire (e.g., '3600s', '1h', or an ISO-8601 duration)."
+        },
+        {
+            "name": "jwt.issuer",
+            "type": "java.lang.String",
+            "description": "Issuer claim to include in generated JWT tokens identifying the issuing authority or service."
+        },
+        {
+            "name": "jwt.audience",
+            "type": "java.lang.String",
+            "description": "Audience claim for JWT tokens specifying the intended recipients or services."
+        },
+        {
+            "name": "file.upload-dir",
+            "type": "java.lang.String",
+            "description": "Filesystem directory path where uploaded files should be stored; must be writable by the application."
+        }
+    ]
+}
