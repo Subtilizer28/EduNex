@@ -75,11 +75,11 @@
 
             <!-- Main Content Grid -->
             <div class="dashboard-grid">
-                <!-- User Management -->
-                <div class="dashboard-card">
+                <!-- User Management - Full Width -->
+                <div class="dashboard-card" style="grid-column: 1 / -1;">
                     <div class="card-header">
                         <h2>Recent Users</h2>
-                        <a href="/admin/users" class="btn-link">Manage All</a>
+                        <a href="/admin/users" class="btn btn-sm btn-primary">Manage All</a>
                     </div>
                     <div class="table-responsive">
                         <table class="data-table">
@@ -100,12 +100,14 @@
                 </div>
 
                 <!-- System Activity -->
-                <div class="dashboard-card">
+                <div class="dashboard-card" style="grid-column: 1 / -1;">
                     <div class="card-header">
                         <h2>System Activity</h2>
                     </div>
-                    <div class="activity-list" id="systemActivity">
-                        <!-- Activity will be loaded here -->
+                    <div class="card-content">
+                        <div class="activity-list" id="systemActivity">
+                            <!-- Activity will be loaded here -->
+                        </div>
                     </div>
                 </div>
 

@@ -65,6 +65,33 @@
         </div>
     </div>
 
+    <!-- User Details Modal -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeUserModal()">&times;</span>
+            <h2>User Details</h2>
+            <div id="userDetailsContent"></div>
+        </div>
+    </div>
+
+    <!-- Add to Course Modal -->
+    <div id="addToCourseModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddToCourseModal()">&times;</span>
+            <h2>Add Student to Course</h2>
+            <div class="form-group">
+                <label for="courseSelect">Select Course:</label>
+                <select id="courseSelect" class="form-control">
+                    <option value="">Loading courses...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <button onclick="addStudentToCourse()" class="btn btn-primary">Add to Course</button>
+                <button onclick="closeAddToCourseModal()" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <script src="/js/main.js"></script>
     <script src="/js/auth.js"></script>
     <script src="/js/admin-dashboard.js"></script>
@@ -128,7 +155,7 @@
                         ${users.map(user => `
                             <tr>
                                 <td>${user.id}</td>
-                                <td>${user.firstName} ${user.lastName}</td>
+                                <td>${user.fullName || 'N/A'}</td>
                                 <td>${user.email}</td>
                                 <td><span class="badge badge-${user.role.toLowerCase()}">${user.role}</span></td>
                                 <td>
@@ -138,15 +165,23 @@
                                 </td>
                                 <td>${formatDate(user.createdAt)}</td>
                                 <td class="action-buttons">
+                                    <button onclick="viewUserDetails(${user.id})" 
+                                            class="btn btn-sm btn-info"
+                                            title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    ${user.role === 'STUDENT' ? `
+                                    <button onclick="openAddToCourseModal(${user.id})" 
+                                            class="btn btn-sm btn-primary"
+                                            title="Add to Course">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                    ` : ''}
                                     <button onclick="toggleUserStatus(${user.id}, ${user.enabled})" 
                                             class="btn btn-sm ${user.enabled ? 'btn-warning' : 'btn-success'}"
                                             title="${user.enabled ? 'Deactivate' : 'Activate'}">
                                         <i class="fas fa-${user.enabled ? 'ban' : 'check'}"></i>
                                     </button>
-                                    <button onclick="viewUserDetails(${user.id})" 
-                                            class="btn btn-sm btn-info"
-                                            title="View Details">
-                                        <i class="fas fa-eye"></i>
                                     </button>
                                 </td>
                             </tr>
@@ -166,8 +201,7 @@
                 const matchesRole = !roleFilter || user.role === roleFilter;
                 const matchesStatus = !statusFilter || user.enabled.toString() === statusFilter;
                 const matchesSearch = !searchInput || 
-                    user.firstName.toLowerCase().includes(searchInput) ||
-                    user.lastName.toLowerCase().includes(searchInput) ||
+                    (user.fullName && user.fullName.toLowerCase().includes(searchInput)) ||
                     user.email.toLowerCase().includes(searchInput);
                 
                 return matchesRole && matchesStatus && matchesSearch;
@@ -198,7 +232,106 @@
             const user = allUsers.find(u => u.id === userId);
             if (!user) return;
 
-            alert(`User Details:\n\nName: ${user.firstName} ${user.lastName}\nEmail: ${user.email}\nRole: ${user.role}\nStatus: ${user.enabled ? 'Active' : 'Inactive'}\nCreated: ${formatDate(user.createdAt)}`);
+            const content = `
+                <div class="user-details-grid">
+                    <div class="detail-item">
+                        <span class="detail-label"><i class="fas fa-user"></i> Full Name:</span>
+                        <span class="detail-value">${user.fullName || 'N/A'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label"><i class="fas fa-envelope"></i> Email:</span>
+                        <span class="detail-value">${user.email}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label"><i class="fas fa-user-tag"></i> Username:</span>
+                        <span class="detail-value">${user.username}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label"><i class="fas fa-user-shield"></i> Role:</span>
+                        <span class="detail-value"><span class="badge badge-${user.role.toLowerCase()}">${user.role}</span></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label"><i class="fas fa-toggle-on"></i> Status:</span>
+                        <span class="detail-value"><span class="badge badge-${user.enabled ? 'success' : 'danger'}">${user.enabled ? 'Active' : 'Inactive'}</span></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label"><i class="fas fa-phone"></i> Phone:</span>
+                        <span class="detail-value">${user.phoneNumber || 'N/A'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label"><i class="fas fa-calendar-plus"></i> Created At:</span>
+                        <span class="detail-value">${formatDate(user.createdAt)}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label"><i class="fas fa-calendar-check"></i> Updated At:</span>
+                        <span class="detail-value">${formatDate(user.updatedAt)}</span>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('userDetailsContent').innerHTML = content;
+            document.getElementById('userModal').style.display = 'block';
+        }
+
+        function closeUserModal() {
+            document.getElementById('userModal').style.display = 'none';
+        }
+
+        let selectedStudentId = null;
+
+        async function openAddToCourseModal(userId) {
+            selectedStudentId = userId;
+            document.getElementById('addToCourseModal').style.display = 'block';
+            
+            try {
+                const courses = await apiCall('/api/admin/courses');
+                const select = document.getElementById('courseSelect');
+                select.innerHTML = '<option value="">Select a course</option>' + 
+                    courses.map(c => `<option value="${c.id}">${c.courseCode} - ${c.courseName}</option>`).join('');
+            } catch (error) {
+                console.error('Error loading courses:', error);
+                alert('Failed to load courses');
+            }
+        }
+
+        function closeAddToCourseModal() {
+            document.getElementById('addToCourseModal').style.display = 'none';
+            selectedStudentId = null;
+        }
+
+        async function addStudentToCourse() {
+            const courseId = document.getElementById('courseSelect').value;
+            if (!courseId || !selectedStudentId) {
+                alert('Please select a course');
+                return;
+            }
+
+            try {
+                await apiCall('/api/enrollments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        studentId: selectedStudentId,
+                        courseId: parseInt(courseId)
+                    })
+                });
+                alert('Student added to course successfully');
+                closeAddToCourseModal();
+            } catch (error) {
+                console.error('Error adding student to course:', error);
+                alert('Failed to add student to course: ' + error.message);
+            }
+        }
+
+        window.onclick = function(event) {
+            const userModal = document.getElementById('userModal');
+            const courseModal = document.getElementById('addToCourseModal');
+            if (event.target == userModal) {
+                closeUserModal();
+            }
+            if (event.target == courseModal) {
+                closeAddToCourseModal();
+            }
         }
     </script>
 </body>

@@ -76,28 +76,32 @@
             <!-- Main Content Grid -->
             <div class="dashboard-grid">
                 <!-- My Courses -->
-                <div class="dashboard-card">
+                <div class="dashboard-card" style="grid-column: 1 / -1;">
                     <div class="card-header">
                         <h2>My Courses</h2>
-                        <a href="/instructor/courses" class="btn-link">View All</a>
+                        <a href="/instructor/courses" class="btn btn-sm btn-primary">View All</a>
                     </div>
-                    <div class="courses-list" id="coursesList">
-                        <!-- Courses will be loaded here -->
+                    <div class="card-content">
+                        <div class="courses-list" id="coursesList">
+                            <!-- Courses will be loaded here -->
+                        </div>
                     </div>
                 </div>
 
                 <!-- Recent Activity -->
-                <div class="dashboard-card">
+                <div class="dashboard-card" style="grid-column: 1 / -1;">
                     <div class="card-header">
                         <h2>Recent Activity</h2>
                     </div>
-                    <div class="activity-list" id="activityList">
-                        <!-- Activity will be loaded here -->
+                    <div class="card-content">
+                        <div class="activity-list" id="activityList">
+                            <!-- Activity will be loaded here -->
+                        </div>
                     </div>
                 </div>
 
                 <!-- Pending Assignments -->
-                <div class="dashboard-card full-width">
+                <div class="dashboard-card" style="grid-column: 1 / -1;">
                     <div class="card-header">
                         <h2>Assignments to Grade</h2>
                     </div>
@@ -121,11 +125,13 @@
                 </div>
 
                 <!-- Student Performance Chart -->
-                <div class="dashboard-card full-width">
+                <div class="dashboard-card" style="grid-column: 1 / -1;">
                     <div class="card-header">
                         <h2>Student Performance Overview</h2>
                     </div>
-                    <canvas id="performanceChart"></canvas>
+                    <div class="card-content">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>

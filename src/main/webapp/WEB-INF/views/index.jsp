@@ -11,11 +11,13 @@
     <nav class="navbar">
         <div class="nav-container">
             <a href="/" class="nav-logo">EduNex</a>
-            <ul class="nav-menu">
+            <ul class="nav-menu" id="navMenu">
                 <li class="nav-item"><a href="/" class="nav-link active"><i class="fas fa-home"></i> Home</a></li>
                 <li class="nav-item"><a href="#features" class="nav-link"><i class="fas fa-star"></i> Features</a></li>
                 <li class="nav-item"><a href="#about" class="nav-link"><i class="fas fa-info-circle"></i> About</a></li>
-                <li class="nav-item"><a href="/login" class="nav-link"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                <li class="nav-item" id="loginNavItem"><a href="/login" class="nav-link"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                <li class="nav-item" id="dashboardNavItem" style="display: none;"><a href="#" id="dashboardLink" class="nav-link"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+                <li class="nav-item" id="logoutNavItem" style="display: none;"><a href="#" id="logoutBtn" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
             <div class="hamburger">
                 <span></span>
@@ -33,8 +35,8 @@
                 Transform your educational experience with our modern, AI-powered LMS. 
                 Manage courses, track attendance, take quizzes, and analyze performance all in one place.
             </p>
-            <div class="hero-buttons">
-                <a href="/login" class="btn btn-primary btn-large">Sign In</a>
+            <div class="hero-buttons" id="heroButtons">
+                <a href="/login" class="btn btn-primary btn-large" id="heroLoginBtn">Sign In</a>
             </div>
         </div>
     </section>
@@ -107,5 +109,39 @@
     </footer>
     
     <script src="/js/main.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        // Check if user is logged in and update UI
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('token');
+            const user = getCurrentUser();
+            
+            if (token && user) {
+                // Hide login nav and button
+                document.getElementById('loginNavItem').style.display = 'none';
+                document.getElementById('heroLoginBtn').style.display = 'none';
+                
+                // Show logout nav
+                document.getElementById('logoutNavItem').style.display = 'flex';
+                
+                // Show dashboard nav and set link based on role
+                const dashboardNavItem = document.getElementById('dashboardNavItem');
+                const dashboardLink = document.getElementById('dashboardLink');
+                dashboardNavItem.style.display = 'flex';
+                
+                if (user.role === 'ADMIN') {
+                    dashboardLink.href = '/admin/dashboard';
+                } else if (user.role === 'INSTRUCTOR') {
+                    dashboardLink.href = '/instructor/dashboard';
+                } else {
+                    dashboardLink.href = '/student/dashboard';
+                }
+                
+                // Replace hero button with dashboard button
+                const heroButtons = document.getElementById('heroButtons');
+                heroButtons.innerHTML = `<a href="${dashboardLink.href}" class="btn btn-primary btn-large"><i class="fas fa-chart-line"></i> Go to Dashboard</a>`;
+            }
+        });
+    </script>
 </body>
 </html>
