@@ -384,17 +384,10 @@ This project is licensed under the MIT License.
 
 ---
 
-## 👨‍💻 Author
-
-Developed with ❤️ for modern online education
-
----
-
 ## 📞 Support
 
 For issues or questions:
 - Open an issue on GitHub
-- Email: support@edunex.com
 
 ---
 
