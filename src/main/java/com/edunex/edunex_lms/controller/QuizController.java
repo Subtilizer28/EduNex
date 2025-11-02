@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/quizzes")
@@ -45,7 +46,7 @@ public class QuizController {
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<QuizAttempt> submitQuizAttempt(
             @PathVariable Long attemptId,
-            @RequestBody List<Answer> answers) {
+            @RequestBody Map<Long, String> answers) {
         QuizAttempt attempt = quizService.submitQuizAttempt(attemptId, answers);
         return ResponseEntity.ok(attempt);
     }

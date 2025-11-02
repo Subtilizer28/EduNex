@@ -24,7 +24,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadDashboardStats();
     await loadCourses();
     await loadAssignments();
-    checkAIAvailability();
     initializeChart();
 });
 
@@ -138,33 +137,6 @@ async function loadAssignments() {
     } catch (error) {
         tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--danger-color);">Failed to load assignments</td></tr>';
         console.error('Error loading assignments:', error);
-    }
-}
-
-// Check AI Availability
-async function checkAIAvailability() {
-    const aiNotice = document.getElementById('aiNotice');
-    const aiMessage = document.getElementById('aiStatusMessage');
-    
-    try {
-        // Check if AI is configured (you can make an API call to check)
-        const hasAI = false; // Replace with actual check
-        
-        if (hasAI) {
-            aiMessage.innerHTML = `
-                <p style="color: var(--success-color);">✅ AI Features are enabled!</p>
-                <p>You can use AI-powered study recommendations and automated quiz generation.</p>
-            `;
-        } else {
-            aiMessage.innerHTML = `
-                <p style="color: var(--text-secondary);">ℹ️ AI Features Not Available</p>
-                <p>AI features require an API key to be configured. Contact your administrator.</p>
-            `;
-        }
-    } catch (error) {
-        aiMessage.innerHTML = `
-            <p style="color: var(--danger-color);">❌ Could not check AI availability</p>
-        `;
     }
 }
 

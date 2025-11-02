@@ -7,8 +7,6 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "quiz_attempts")
@@ -51,9 +49,6 @@ public class QuizAttempt {
     
     @Column
     private LocalDateTime submittedAt;
-    
-    @OneToMany(mappedBy = "quizAttempt", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Answer> answers = new ArrayList<>();
     
     public enum AttemptStatus {
         IN_PROGRESS, SUBMITTED, GRADED

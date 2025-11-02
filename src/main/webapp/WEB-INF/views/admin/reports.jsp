@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reports & Analytics - EduNex LMS</title>
+    <title>Reports - EduNex LMS</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -31,12 +31,9 @@
     <div class="container">
         <div class="page-header">
             <div>
-                <h1><i class="fas fa-chart-bar"></i> Reports & Analytics</h1>
-                <p>System-wide reports and statistics</p>
+                <h1><i class="fas fa-chart-bar"></i> System Reports</h1>
+                <p>Overview of system statistics</p>
             </div>
-            <button id="exportPdfBtn" class="btn btn-primary" style="display: none;">
-                <i class="fas fa-file-pdf"></i> Export PDF
-            </button>
         </div>
 
         <div id="reportsOverview">
@@ -46,11 +43,10 @@
         </div>
 
         <div class="reports-sections" id="reportsSections" style="display: none;">
-            <!-- Summary Overview Card -->
-            <div class="card summary-card">
+            <!-- Summary Overview -->
+            <div class="card">
                 <div class="card-header">
-                    <h2><i class="fas fa-chart-pie"></i> Executive Summary</h2>
-                    <span class="badge badge-primary" id="reportDate"></span>
+                    <h2><i class="fas fa-chart-pie"></i> System Overview</h2>
                 </div>
                 <div class="card-body">
                     <div class="summary-grid">
@@ -59,9 +55,9 @@
                                 <i class="fas fa-users fa-2x"></i>
                             </div>
                             <div class="summary-details">
-                                <h3 id="summaryUsers">0</h3>
+                                <h3 id="totalUsers">0</h3>
                                 <p>Total Users</p>
-                                <span class="summary-subtitle" id="summaryUsersBreakdown"></span>
+                                <span class="summary-subtitle"><span id="activeUsers">0</span> active, <span id="inactiveUsers">0</span> inactive</span>
                             </div>
                         </div>
                         <div class="summary-item">
@@ -69,36 +65,96 @@
                                 <i class="fas fa-book fa-2x"></i>
                             </div>
                             <div class="summary-details">
-                                <h3 id="summaryCourses">0</h3>
+                                <h3 id="totalCourses">0</h3>
                                 <p>Total Courses</p>
-                                <span class="summary-subtitle" id="summaryCoursesBreakdown"></span>
                             </div>
                         </div>
                         <div class="summary-item">
                             <div class="summary-icon" style="background: rgba(155, 89, 182, 0.1); color: #9b59b6;">
-                                <i class="fas fa-tasks fa-2x"></i>
+                                <i class="fas fa-user-graduate fa-2x"></i>
                             </div>
                             <div class="summary-details">
-                                <h3 id="summaryActivities">0</h3>
-                                <p>Total Activities</p>
-                                <span class="summary-subtitle" id="summaryActivitiesBreakdown"></span>
+                                <h3 id="totalEnrollments">0</h3>
+                                <p>Total Enrollments</p>
                             </div>
                         </div>
                         <div class="summary-item">
                             <div class="summary-icon" style="background: rgba(230, 126, 34, 0.1); color: #e67e22;">
-                                <i class="fas fa-chart-line fa-2x"></i>
+                                <i class="fas fa-tasks fa-2x"></i>
                             </div>
                             <div class="summary-details">
-                                <h3 id="summaryEngagement">0%</h3>
-                                <p>Engagement Rate</p>
-                                <span class="summary-subtitle" id="summaryEngagementBreakdown"></span>
+                                <h3 id="totalAssignments">0</h3>
+                                <p>Assignments</p>
+                            </div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-icon" style="background: rgba(231, 76, 60, 0.1); color: #e74c3c;">
+                                <i class="fas fa-question-circle fa-2x"></i>
+                            </div>
+                            <div class="summary-details">
+                                <h3 id="totalQuizzes">0</h3>
+                                <p>Quizzes</p>
+                            </div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-icon" style="background: rgba(52, 152, 219, 0.1); color: #3498db;">
+                                <i class="fas fa-clipboard-check fa-2x"></i>
+                            </div>
+                            <div class="summary-details">
+                                <h3 id="totalAttendance">0</h3>
+                                <p>Attendance Records</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <!-- User Statistics -->
+    <script src="/js/auth.js"></script>
+    <script>
+        checkAuth();
+        
+        async function loadReports() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/admin/reports/overview', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) throw new Error('Failed to load reports');
+                
+                const data = await response.json();
+                
+                document.getElementById('totalUsers').textContent = data.totalUsers || 0;
+                document.getElementById('activeUsers').textContent = data.activeUsers || 0;
+                document.getElementById('inactiveUsers').textContent = data.inactiveUsers || 0;
+                document.getElementById('totalCourses').textContent = data.totalCourses || 0;
+                document.getElementById('totalEnrollments').textContent = data.totalEnrollments || 0;
+                document.getElementById('totalAssignments').textContent = data.totalAssignments || 0;
+                document.getElementById('totalQuizzes').textContent = data.totalQuizzes || 0;
+                document.getElementById('totalAttendance').textContent = data.totalAttendance || 0;
+                
+                document.getElementById('reportsOverview').style.display = 'none';
+                document.getElementById('reportsSections').style.display = 'block';
+            } catch (error) {
+                console.error('Error loading reports:', error);
+                document.getElementById('reportsOverview').innerHTML = 
+                    '<div class="error-message"><i class="fas fa-exclamation-triangle"></i> Failed to load reports</div>';
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', loadReports);
+        
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            logout();
+        });
+    </script>
+</body>
+</html>            <!-- User Statistics -->
             <div class="card">
                 <div class="card-header">
                     <h2><i class="fas fa-users"></i> User Statistics</h2>

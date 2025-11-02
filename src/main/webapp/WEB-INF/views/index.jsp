@@ -30,9 +30,9 @@
     <section class="hero">
         <div class="hero-content">
             <h1>Welcome to EduNex</h1>
-            <p>Intelligent Learning Management System</p>
+            <p>Learning Management System</p>
             <p class="hero-description">
-                Transform your educational experience with our modern, AI-powered LMS. 
+                Transform your educational experience with our modern LMS. 
                 Manage courses, track attendance, take quizzes, and analyze performance all in one place.
             </p>
             <div class="hero-buttons" id="heroButtons">
@@ -79,13 +79,6 @@
                     </div>
                     <h3>Secure & Scalable</h3>
                     <p>Role-based access control with JWT authentication and enterprise security</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-brain"></i>
-                    </div>
-                    <h3>AI-Powered (Optional)</h3>
-                    <p>Get AI-generated quizzes, personalized recommendations, and smart insights</p>
                 </div>
             </div>
         </div>

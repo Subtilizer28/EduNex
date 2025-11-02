@@ -116,14 +116,6 @@
                     </table>
                 </div>
             </div>
-            
-            <!-- AI Features Notice -->
-            <div class="card" id="aiNotice">
-                <div class="card-header">
-                    <h3 class="card-title">🤖 AI Features</h3>
-                </div>
-                <p id="aiStatusMessage">Checking AI availability...</p>
-            </div>
         </div>
     </main>
     

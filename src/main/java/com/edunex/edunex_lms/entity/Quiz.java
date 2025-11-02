@@ -9,8 +9,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "quizzes")
@@ -54,12 +52,6 @@ public class Quiz {
     
     @Column
     private LocalDateTime endTime;
-    
-    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Question> questions = new ArrayList<>();
-    
-    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<QuizAttempt> attempts = new ArrayList<>();
     
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

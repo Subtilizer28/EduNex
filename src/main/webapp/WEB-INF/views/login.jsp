@@ -12,7 +12,7 @@
         <div class="auth-card">
             <div class="auth-header">
                 <h1>EduNex</h1>
-                <p>Intelligent Learning Management System</p>
+                <p>Learning Management System</p>
             </div>
             
             <form id="loginForm" class="auth-form">

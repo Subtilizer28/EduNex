@@ -177,38 +177,12 @@ function loadEnrollmentChart() {
 }
 
 function setupEventListeners() {
-    const broadcastForm = document.getElementById('broadcastForm');
-    if (broadcastForm) {
-        broadcastForm.addEventListener('submit', handleBroadcast);
-    }
-    
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', function(e) {
             e.preventDefault();
             logout();
         });
-    }
-}
-
-async function handleBroadcast(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(e.target);
-    const title = formData.get('title');
-    const message = formData.get('message');
-    const type = formData.get('type');
-    
-    try {
-        await apiCall(
-            `/api/admin/notifications/broadcast?title=${encodeURIComponent(title)}&message=${encodeURIComponent(message)}&type=${type}`,
-            { method: 'POST' }
-        );
-        showToast('Broadcast sent successfully!', 'success');
-        closeBroadcastModal();
-    } catch (error) {
-        console.error('Error sending broadcast:', error);
-        showToast('Failed to send broadcast', 'error');
     }
 }
 
@@ -253,22 +227,5 @@ async function deleteUser(userId) {
             console.error('Error deleting user:', error);
             showToast('Failed to delete user', 'error');
         }
-    }
-}
-
-function openBroadcastModal() {
-    document.getElementById('broadcastModal').style.display = 'block';
-}
-
-function closeBroadcastModal() {
-    document.getElementById('broadcastModal').style.display = 'none';
-    document.getElementById('broadcastForm').reset();
-}
-
-// Modal click outside to close
-window.onclick = function(event) {
-    const modal = document.getElementById('broadcastModal');
-    if (event.target === modal) {
-        closeBroadcastModal();
     }
 }

@@ -1,32 +1,22 @@
 package com.edunex.edunex_lms.controller;
 
-import com.edunex.edunex_lms.entity.Attendance;
 import com.edunex.edunex_lms.entity.Course;
-import com.edunex.edunex_lms.entity.Notification;
 import com.edunex.edunex_lms.entity.User;
+import com.edunex.edunex_lms.entity.Enrollment;
 import com.edunex.edunex_lms.repository.AssignmentRepository;
+import com.edunex.edunex_lms.repository.AttendanceRepository;
 import com.edunex.edunex_lms.repository.CourseRepository;
 import com.edunex.edunex_lms.repository.EnrollmentRepository;
 import com.edunex.edunex_lms.repository.QuizRepository;
 import com.edunex.edunex_lms.repository.UserRepository;
-import com.edunex.edunex_lms.service.AttendanceService;
-import com.edunex.edunex_lms.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,8 +33,7 @@ public class AdminController {
     private final EnrollmentRepository enrollmentRepository;
     private final AssignmentRepository assignmentRepository;
     private final QuizRepository quizRepository;
-    private final AttendanceService attendanceService;
-    private final NotificationService notificationService;
+    private final AttendanceRepository attendanceRepository;
     private final PasswordEncoder passwordEncoder;
     
     @GetMapping("/users")
@@ -129,40 +118,20 @@ public class AdminController {
     public ResponseEntity<Map<String, Object>> getReportsOverview() {
         try {
             Map<String, Object> report = new HashMap<>();
-            
-            // User statistics
             report.put("totalUsers", userRepository.count());
             report.put("activeUsers", userRepository.findByEnabled(true).size());
             report.put("inactiveUsers", userRepository.findByEnabled(false).size());
-            
-            // Course statistics
             report.put("totalCourses", courseRepository.count());
             report.put("totalEnrollments", enrollmentRepository.count());
-            
-            // Assignment statistics  
             report.put("totalAssignments", assignmentRepository.count());
-            
-            // Quiz statistics
             report.put("totalQuizzes", quizRepository.count());
-            
+            report.put("totalAttendance", attendanceRepository.count());
             return ResponseEntity.ok(report);
         } catch (Exception e) {
             log.error("Error generating reports", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("error", "Failed to generate reports: " + e.getMessage()));
         }
-    }
-    
-    @PostMapping("/notifications/broadcast")
-    public ResponseEntity<Void> broadcastNotification(
-            @RequestParam String title,
-            @RequestParam String message,
-            @RequestParam String type) {
-        List<User> users = userRepository.findAll();
-        for (User user : users) {
-            notificationService.createNotification(user.getId(), title, message, type);
-        }
-        return ResponseEntity.ok().build();
     }
     
     @PostMapping("/users")
@@ -204,109 +173,34 @@ public class AdminController {
         }
     }
     
-    @PostMapping("/users/bulk-upload")
-    public ResponseEntity<?> bulkUploadUsers(@RequestParam("file") MultipartFile file) {
-        if (file.isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of(
-                "error", "Please select a CSV file to upload"
-            ));
-        }
-        
-        if (!file.getOriginalFilename().endsWith(".csv")) {
-            return ResponseEntity.badRequest().body(Map.of(
-                "error", "Only CSV files are supported"
-            ));
-        }
-        
-        List<Map<String, String>> successList = new ArrayList<>();
-        List<Map<String, String>> errorList = new ArrayList<>();
-        int totalProcessed = 0;
-        
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
+    // Enrollment management - Admin assigns instructor to course
+    @PostMapping("/enrollments/instructor")
+    public ResponseEntity<?> assignInstructorToCourse(
+            @RequestParam Long courseId,
+            @RequestParam Long instructorId) {
+        try {
+            Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+            User instructor = userRepository.findById(instructorId)
+                .orElseThrow(() -> new RuntimeException("Instructor not found"));
             
-            CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT
-                .withFirstRecordAsHeader()
-                .withIgnoreHeaderCase()
-                .withTrim());
-            
-            for (CSVRecord record : csvParser) {
-                totalProcessed++;
-                try {
-                    String username = record.get("username");
-                    String email = record.get("email");
-                    String fullName = record.get("fullName");
-                    String password = record.get("password");
-                    String roleStr = record.isMapped("role") ? record.get("role") : "STUDENT";
-                    
-                    if (username == null || username.trim().isEmpty() ||
-                        email == null || email.trim().isEmpty() ||
-                        fullName == null || fullName.trim().isEmpty() ||
-                        password == null || password.trim().isEmpty()) {
-                        errorList.add(Map.of(
-                            "row", String.valueOf(totalProcessed),
-                            "error", "Missing required fields"
-                        ));
-                        continue;
-                    }
-                    
-                    if (userRepository.existsByUsername(username)) {
-                        errorList.add(Map.of(
-                            "row", String.valueOf(totalProcessed),
-                            "username", username,
-                            "error", "Username already exists"
-                        ));
-                        continue;
-                    }
-                    
-                    if (userRepository.existsByEmail(email)) {
-                        errorList.add(Map.of(
-                            "row", String.valueOf(totalProcessed),
-                            "email", email,
-                            "error", "Email already exists"
-                        ));
-                        continue;
-                    }
-                    
-                    User user = new User();
-                    user.setUsername(username.trim());
-                    user.setEmail(email.trim());
-                    user.setFullName(fullName.trim());
-                    user.setPassword(passwordEncoder.encode(password));
-                    user.setRole(User.Role.valueOf(roleStr.toUpperCase()));
-                    user.setEnabled(true);
-                    
-                    userRepository.save(user);
-                    
-                    successList.add(Map.of(
-                        "row", String.valueOf(totalProcessed),
-                        "username", username,
-                        "email", email,
-                        "fullName", fullName
-                    ));
-                    
-                } catch (Exception e) {
-                    log.error("Error processing row {}", totalProcessed, e);
-                    errorList.add(Map.of(
-                        "row", String.valueOf(totalProcessed),
-                        "error", e.getMessage()
-                    ));
-                }
+            if (instructor.getRole() != User.Role.INSTRUCTOR) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "User is not an instructor"));
             }
             
-            return ResponseEntity.ok(Map.of(
-                "message", "Bulk upload completed",
-                "totalProcessed", totalProcessed,
-                "successCount", successList.size(),
-                "errorCount", errorList.size(),
-                "successList", successList,
-                "errorList", errorList
-            ));
+            course.setInstructor(instructor);
+            courseRepository.save(course);
             
+            return ResponseEntity.ok(Map.of(
+                "message", "Instructor assigned to course successfully",
+                "courseId", courseId,
+                "instructorId", instructorId
+            ));
         } catch (Exception e) {
-            log.error("Error processing CSV file", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-                "error", "Failed to process CSV file: " + e.getMessage()
+            log.error("Error assigning instructor", e);
+            return ResponseEntity.badRequest().body(Map.of(
+                "error", "Failed to assign instructor: " + e.getMessage()
             ));
         }
     }

@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
+//@Component
 @RequiredArgsConstructor
 @Slf4j
 public class DataSeeder implements CommandLineRunner {
@@ -25,7 +25,6 @@ public class DataSeeder implements CommandLineRunner {
     private final QuizRepository quizRepository;
     private final QuestionRepository questionRepository;
     private final AttendanceRepository attendanceRepository;
-    private final NotificationRepository notificationRepository;
     private final PasswordEncoder passwordEncoder;
     
     @Override
@@ -96,10 +95,6 @@ public class DataSeeder implements CommandLineRunner {
         // Create attendance records
         createAttendanceRecords(students, course1);
         createAttendanceRecords(students, course2);
-        
-        // Create notifications
-        createNotifications(students.get(0));
-        createNotifications(students.get(1));
         
         log.info("Database seeding completed successfully!");
         log.info("Admin credentials - Username: admin, Password: admin123");
@@ -223,23 +218,5 @@ public class DataSeeder implements CommandLineRunner {
                 attendanceRepository.save(attendance);
             }
         }
-    }
-    
-    private void createNotifications(User user) {
-        Notification notif1 = new Notification();
-        notif1.setUser(user);
-        notif1.setTitle("Welcome to EduNex!");
-        notif1.setMessage("Start exploring your courses and assignments.");
-        notif1.setType(Notification.NotificationType.SYSTEM);
-        notif1.setIsRead(false);
-        notificationRepository.save(notif1);
-        
-        Notification notif2 = new Notification();
-        notif2.setUser(user);
-        notif2.setTitle("New Assignment Posted");
-        notif2.setMessage("A new assignment has been posted in your course.");
-        notif2.setType(Notification.NotificationType.ASSIGNMENT);
-        notif2.setIsRead(false);
-        notificationRepository.save(notif2);
     }
 }

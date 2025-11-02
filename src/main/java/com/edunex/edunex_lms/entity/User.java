@@ -67,23 +67,6 @@ public class User {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
     
-    // Relationships
-    @JsonIgnore
-    @OneToMany(mappedBy = "instructor", cascade = CascadeType.ALL)
-    private List<Course> coursesTeaching = new ArrayList<>();
-    
-    @JsonIgnore
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
-    private List<Enrollment> enrollments = new ArrayList<>();
-    
-    @JsonIgnore
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
-    private List<Assignment> assignments = new ArrayList<>();
-    
-    @JsonIgnore
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
-    private List<QuizAttempt> quizAttempts = new ArrayList<>();
-    
     public enum Role {
         ADMIN, INSTRUCTOR, STUDENT
     }

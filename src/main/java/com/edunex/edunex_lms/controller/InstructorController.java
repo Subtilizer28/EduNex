@@ -1,15 +1,16 @@
 package com.edunex.edunex_lms.controller;
 
 import com.edunex.edunex_lms.entity.Attendance;
-import com.edunex.edunex_lms.entity.Notification;
+import com.edunex.edunex_lms.entity.Enrollment;
 import com.edunex.edunex_lms.service.AttendanceService;
-import com.edunex.edunex_lms.service.NotificationService;
+import com.edunex.edunex_lms.service.EnrollmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/instructor")
@@ -18,8 +19,9 @@ import java.util.List;
 public class InstructorController {
     
     private final AttendanceService attendanceService;
-    private final NotificationService notificationService;
+    private final EnrollmentService enrollmentService;
     
+    // Attendance marking functionality
     @PostMapping("/attendance")
     public ResponseEntity<Attendance> markAttendance(
             @RequestParam Long studentId,
@@ -51,13 +53,27 @@ public class InstructorController {
         return ResponseEntity.ok(rate);
     }
     
-    @PostMapping("/notifications/send")
-    public ResponseEntity<Notification> sendNotification(
-            @RequestParam Long userId,
-            @RequestParam String title,
-            @RequestParam String message,
-            @RequestParam String type) {
-        Notification notification = notificationService.createNotification(userId, title, message, type);
-        return ResponseEntity.ok(notification);
+    // Student enrollment - Instructor enrolls students in their courses
+    @PostMapping("/enrollments")
+    public ResponseEntity<?> enrollStudent(
+            @RequestParam Long studentId,
+            @RequestParam Long courseId) {
+        try {
+            Enrollment enrollment = enrollmentService.enrollStudent(studentId, courseId);
+            return ResponseEntity.ok(Map.of(
+                "message", "Student enrolled successfully",
+                "enrollmentId", enrollment.getId()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "error", e.getMessage()
+            ));
+        }
+    }
+    
+    @GetMapping("/enrollments/course/{courseId}")
+    public ResponseEntity<List<Enrollment>> getCourseEnrollments(@PathVariable Long courseId) {
+        List<Enrollment> enrollments = enrollmentService.getCourseEnrollments(courseId);
+        return ResponseEntity.ok(enrollments);
     }
 }

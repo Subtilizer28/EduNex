@@ -144,13 +144,6 @@
                     <div class="card-body">
                         <div class="form-group">
                             <label class="checkbox-label">
-                                <input type="checkbox" id="emailNotifications" checked>
-                                <span>Receive email notifications</span>
-                            </label>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="checkbox-label">
                                 <input type="checkbox" id="darkMode" onchange="toggleThemePreference()">
                                 <span>Dark mode</span>
                             </label>

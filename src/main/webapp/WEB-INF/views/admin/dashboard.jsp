@@ -36,9 +36,6 @@
                     <h1>Admin Dashboard</h1>
                     <p>System Overview & Management</p>
                 </div>
-                <button class="btn btn-primary" onclick="openBroadcastModal()">
-                    📢 Broadcast Message
-                </button>
             </div>
 
             <!-- Stats Grid -->
@@ -166,10 +163,6 @@
                             <span class="action-icon">📚</span>
                             <span>Manage Courses</span>
                         </button>
-                        <button class="action-btn" onclick="openBroadcastModal()">
-                            <span class="action-icon">📢</span>
-                            <span>Send Notification</span>
-                        </button>
                         <button class="action-btn" onclick="location.href='/admin/reports'">
                             <span class="action-icon">📊</span>
                             <span>View Reports</span>
@@ -179,37 +172,6 @@
             </div>
         </div>
     </main>
-
-    <!-- Broadcast Modal -->
-    <div id="broadcastModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeBroadcastModal()">&times;</span>
-            <h2>Broadcast Message</h2>
-            <form id="broadcastForm">
-                <div class="form-group">
-                    <label for="notifTitle">Title</label>
-                    <input type="text" id="notifTitle" name="title" required>
-                </div>
-                <div class="form-group">
-                    <label for="notifMessage">Message</label>
-                    <textarea id="notifMessage" name="message" rows="4" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="notifType">Type</label>
-                    <select id="notifType" name="type" required>
-                        <option value="ANNOUNCEMENT" selected>Announcement</option>
-                        <option value="SYSTEM">System</option>
-                        <option value="COURSE_UPDATE">Course Update</option>
-                        <option value="ASSIGNMENT">Assignment</option>
-                        <option value="QUIZ">Quiz</option>
-                        <option value="GRADE">Grade</option>
-                        <option value="ATTENDANCE">Attendance</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary">Send to All Users</button>
-            </form>
-        </div>
-    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="<c:url value='/js/main.js'/>"></script>

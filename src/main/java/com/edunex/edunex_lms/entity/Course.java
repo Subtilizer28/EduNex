@@ -51,7 +51,7 @@ public class Course {
     @Column(nullable = false)
     private Boolean isActive = true;
     
-    @JsonIgnoreProperties({"coursesTeaching", "enrollments", "assignments", "quizAttempts", "password"})
+    @JsonIgnoreProperties({"password"})
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "instructor_id", nullable = false)
     private User instructor;
@@ -63,25 +63,4 @@ public class Course {
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
-    
-    // Relationships
-    @JsonIgnore
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Enrollment> enrollments = new ArrayList<>();
-    
-    @JsonIgnore
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Assignment> assignments = new ArrayList<>();
-    
-    @JsonIgnore
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Quiz> quizzes = new ArrayList<>();
-    
-    @JsonIgnore
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Attendance> attendances = new ArrayList<>();
-    
-    @JsonIgnore
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CourseMaterial> materials = new ArrayList<>();
 }
