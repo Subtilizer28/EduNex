@@ -25,7 +25,7 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     @Query("SELECT DISTINCT c.category FROM Course c WHERE c.category IS NOT NULL")
     List<String> findAllCategories();
     
-    @Query("SELECT c FROM Course c WHERE c.isActive = true AND SIZE(c.enrollments) < c.maxStudents")
+    @Query("SELECT c FROM Course c WHERE c.isActive = true")
     List<Course> findAvailableCourses();
     
     @Query("SELECT COUNT(c) FROM Course c WHERE c.instructor.id = :instructorId")
