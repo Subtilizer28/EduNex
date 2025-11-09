@@ -17,7 +17,6 @@
                 <li class="nav-item"><a href="/admin/dashboard" class="nav-link active"><i class="fas fa-chart-line"></i> Dashboard</a></li>
                 <li class="nav-item"><a href="/admin/users" class="nav-link"><i class="fas fa-users"></i> Users</a></li>
                 <li class="nav-item"><a href="/admin/courses" class="nav-link"><i class="fas fa-book"></i> Courses</a></li>
-                <li class="nav-item"><a href="/admin/reports" class="nav-link"><i class="fas fa-chart-bar"></i> Reports</a></li>
                 <li class="nav-item"><a href="/profile" class="nav-link"><i class="fas fa-user"></i> Profile</a></li>
                 <li class="nav-item"><a href="#" id="logoutBtn" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
@@ -73,8 +72,8 @@
             <!-- Main Content Grid -->
             <div class="dashboard-grid">
                 <!-- User Management - Full Width -->
-                <div class="dashboard-card" style="grid-column: 1 / -1;">
-                    <div class="card-header">
+                <div class="dashboard-card" style="grid-column: 1 / -1; padding: 1.5rem;">
+                    <div class="card-header" style="padding-bottom: 1rem;">
                         <h2>Recent Users</h2>
                         <a href="/admin/users" class="btn btn-sm btn-primary">Manage All</a>
                     </div>
@@ -97,8 +96,8 @@
                 </div>
 
                 <!-- System Activity -->
-                <div class="dashboard-card" style="grid-column: 1 / -1;">
-                    <div class="card-header">
+                <div class="dashboard-card" style="grid-column: 1 / -1; padding: 1.5rem;">
+                    <div class="card-header" style="padding-bottom: 1rem;">
                         <h2>System Activity</h2>
                     </div>
                     <div class="card-content">
@@ -108,25 +107,30 @@
                     </div>
                 </div>
 
-                <!-- User Distribution Chart -->
-                <div class="dashboard-card full-width">
-                    <div class="card-header">
+                <!-- Charts Row -->
+                <!-- User Distribution Chart - Big -->
+                <div class="dashboard-card" style="grid-column: 1 / span 2; padding: 1.5rem;">
+                    <div class="card-header" style="padding-bottom: 1rem;">
                         <h2>User Distribution</h2>
                     </div>
-                    <canvas id="userChart"></canvas>
+                    <div style="padding: 1rem 0;">
+                        <canvas id="userChart" style="max-height: 400px;"></canvas>
+                    </div>
                 </div>
 
-                <!-- Course Enrollment Chart -->
-                <div class="dashboard-card full-width">
-                    <div class="card-header">
+                <!-- Course Enrollment Chart - Small -->
+                <div class="dashboard-card" style="padding: 1.5rem;">
+                    <div class="card-header" style="padding-bottom: 1rem;">
                         <h2>Course Enrollment Trends</h2>
                     </div>
-                    <canvas id="enrollmentChart"></canvas>
+                    <div style="padding: 1rem 0;">
+                        <canvas id="enrollmentChart" style="max-height: 250px;"></canvas>
+                    </div>
                 </div>
 
                 <!-- System Health -->
-                <div class="dashboard-card">
-                    <div class="card-header">
+                <div class="dashboard-card" style="padding: 1.5rem;">
+                    <div class="card-header" style="padding-bottom: 1rem;">
                         <h2>System Health</h2>
                     </div>
                     <div class="health-metrics">
@@ -150,8 +154,8 @@
                 </div>
 
                 <!-- Quick Actions -->
-                <div class="dashboard-card">
-                    <div class="card-header">
+                <div class="dashboard-card" style="padding: 1.5rem;">
+                    <div class="card-header" style="padding-bottom: 1rem;">
                         <h2>Quick Actions</h2>
                     </div>
                     <div class="quick-actions">
@@ -162,10 +166,6 @@
                         <button class="action-btn" onclick="location.href='/admin/courses'">
                             <span class="action-icon">📚</span>
                             <span>Manage Courses</span>
-                        </button>
-                        <button class="action-btn" onclick="location.href='/admin/reports'">
-                            <span class="action-icon">📊</span>
-                            <span>View Reports</span>
                         </button>
                     </div>
                 </div>

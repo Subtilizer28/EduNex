@@ -3,12 +3,14 @@ package com.edunex.edunex_lms.controller;
 import com.edunex.edunex_lms.entity.Course;
 import com.edunex.edunex_lms.entity.User;
 import com.edunex.edunex_lms.entity.Enrollment;
+import com.edunex.edunex_lms.entity.ActivityLog;
 import com.edunex.edunex_lms.repository.AssignmentRepository;
 import com.edunex.edunex_lms.repository.AttendanceRepository;
 import com.edunex.edunex_lms.repository.CourseRepository;
 import com.edunex.edunex_lms.repository.EnrollmentRepository;
 import com.edunex.edunex_lms.repository.QuizRepository;
 import com.edunex.edunex_lms.repository.UserRepository;
+import com.edunex.edunex_lms.service.ActivityLogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -35,6 +37,7 @@ public class AdminController {
     private final QuizRepository quizRepository;
     private final AttendanceRepository attendanceRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ActivityLogService activityLogService;
     
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers() {
@@ -114,26 +117,6 @@ public class AdminController {
         }
     }
     
-    @GetMapping("/reports/overview")
-    public ResponseEntity<Map<String, Object>> getReportsOverview() {
-        try {
-            Map<String, Object> report = new HashMap<>();
-            report.put("totalUsers", userRepository.count());
-            report.put("activeUsers", userRepository.findByEnabled(true).size());
-            report.put("inactiveUsers", userRepository.findByEnabled(false).size());
-            report.put("totalCourses", courseRepository.count());
-            report.put("totalEnrollments", enrollmentRepository.count());
-            report.put("totalAssignments", assignmentRepository.count());
-            report.put("totalQuizzes", quizRepository.count());
-            report.put("totalAttendance", attendanceRepository.count());
-            return ResponseEntity.ok(report);
-        } catch (Exception e) {
-            log.error("Error generating reports", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Failed to generate reports: " + e.getMessage()));
-        }
-    }
-    
     @PostMapping("/users")
     public ResponseEntity<?> createUser(@RequestBody Map<String, String> userData) {
         try {
@@ -160,6 +143,15 @@ public class AdminController {
             user.setEnabled(true);
             
             User savedUser = userRepository.save(user);
+            
+            // Log activity
+            activityLogService.logActivity(
+                "USER_REGISTRATION",
+                "New " + savedUser.getRole() + " user registered: " + savedUser.getFullName(),
+                savedUser,
+                "User",
+                savedUser.getId()
+            );
             
             return ResponseEntity.ok(Map.of(
                 "message", "User created successfully",
@@ -202,6 +194,17 @@ public class AdminController {
             return ResponseEntity.badRequest().body(Map.of(
                 "error", "Failed to assign instructor: " + e.getMessage()
             ));
+        }
+    }
+    
+    @GetMapping("/activities")
+    public ResponseEntity<List<ActivityLog>> getRecentActivities() {
+        try {
+            List<ActivityLog> activities = activityLogService.getRecentActivities();
+            return ResponseEntity.ok(activities);
+        } catch (Exception e) {
+            log.error("Error loading activities", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

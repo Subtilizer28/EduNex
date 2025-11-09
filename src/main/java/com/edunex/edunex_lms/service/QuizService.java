@@ -20,6 +20,7 @@ public class QuizService {
     private final CourseRepository courseRepository;
     private final UserRepository userRepository;
     private final EnrollmentRepository enrollmentRepository;
+    private final ActivityLogService activityLogService;
     
     @Transactional
     public Quiz createQuiz(Quiz quiz, Long courseId) {
@@ -28,7 +29,18 @@ public class QuizService {
         
         quiz.setCourse(course);
         quiz.setIsActive(true);
-        return quizRepository.save(quiz);
+        Quiz saved = quizRepository.save(quiz);
+        
+        // Log activity
+        activityLogService.logActivity(
+            "QUIZ_CREATED",
+            "New quiz created: " + saved.getTitle() + " in course " + course.getCourseName(),
+            course.getInstructor(),
+            "Quiz",
+            saved.getId()
+        );
+        
+        return saved;
     }
     
     @Transactional
@@ -84,7 +96,18 @@ public class QuizService {
         // Note: Answer storage simplified - answers are passed but not persisted individually
         // In a full implementation, you would store answers in a separate table or as JSON
         
-        return quizAttemptRepository.save(attempt);
+        QuizAttempt saved = quizAttemptRepository.save(attempt);
+        
+        // Log activity
+        activityLogService.logActivity(
+            "QUIZ_ATTEMPTED",
+            "Quiz attempted: " + attempt.getQuiz().getTitle() + " by " + attempt.getStudent().getFullName(),
+            attempt.getStudent(),
+            "QuizAttempt",
+            saved.getId()
+        );
+        
+        return saved;
     }
     
     @Transactional

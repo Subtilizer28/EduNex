@@ -32,6 +32,7 @@ public class AssignmentService {
     private final CourseRepository courseRepository;
     private final UserRepository userRepository;
     private final EnrollmentRepository enrollmentRepository;
+    private final ActivityLogService activityLogService;
     
     private static final String UPLOAD_DIR = "uploads/assignments/";
     
@@ -42,7 +43,18 @@ public class AssignmentService {
         
         assignment.setCourse(course);
         assignment.setStatus(Assignment.SubmissionStatus.PENDING);
-        return assignmentRepository.save(assignment);
+        Assignment saved = assignmentRepository.save(assignment);
+        
+        // Log activity
+        activityLogService.logActivity(
+            "ASSIGNMENT_CREATED",
+            "New assignment created: " + saved.getTitle() + " in course " + course.getCourseName(),
+            course.getInstructor(),
+            "Assignment",
+            saved.getId()
+        );
+        
+        return saved;
     }
     
     @Transactional
@@ -61,7 +73,20 @@ public class AssignmentService {
         assignment.setSubmissionUrl(fileName);
         assignment.setSubmittedAt(LocalDateTime.now());
         
-        return assignmentRepository.save(assignment);
+        Assignment saved = assignmentRepository.save(assignment);
+        
+        // Log activity
+        User student = userRepository.findById(studentId)
+            .orElseThrow(() -> new RuntimeException("Student not found"));
+        activityLogService.logActivity(
+            "ASSIGNMENT_SUBMITTED",
+            "Assignment submitted: " + assignment.getTitle() + " by " + student.getFullName(),
+            student,
+            "Assignment",
+            assignmentId
+        );
+        
+        return saved;
     }
     
     @Transactional

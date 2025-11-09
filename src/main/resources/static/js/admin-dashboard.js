@@ -49,10 +49,17 @@ async function loadRecentUsers() {
     try {
         const users = await apiCall('/api/admin/users');
         
+        // Sort by createdAt DESC and get top 10
+        const sortedUsers = users.sort((a, b) => {
+            const dateA = new Date(a.createdAt);
+            const dateB = new Date(b.createdAt);
+            return dateB - dateA;
+        }).slice(0, 10);
+        
         const tbody = document.getElementById('recentUsers');
         tbody.innerHTML = '';
         
-        users.slice(0, 10).forEach(user => {
+        sortedUsers.forEach(user => {
             const isEnabled = user.enabled === true || user.enabled === 'true';
             const row = document.createElement('tr');
             row.innerHTML = `
@@ -80,38 +87,62 @@ async function loadRecentUsers() {
     }
 }
 
-function loadSystemActivity() {
-    const activityList = document.getElementById('systemActivity');
-    activityList.innerHTML = `
-        <div class="activity-item">
-            <span class="activity-icon">👤</span>
-            <div class="activity-content">
-                <p>New user registered</p>
-                <span class="activity-time">2 minutes ago</span>
-            </div>
-        </div>
-        <div class="activity-item">
-            <span class="activity-icon">📚</span>
-            <div class="activity-content">
-                <p>New course created: Advanced Java</p>
-                <span class="activity-time">15 minutes ago</span>
-            </div>
-        </div>
-        <div class="activity-item">
-            <span class="activity-icon">✅</span>
-            <div class="activity-content">
-                <p>100 students enrolled today</p>
-                <span class="activity-time">1 hour ago</span>
-            </div>
-        </div>
-        <div class="activity-item">
-            <span class="activity-icon">⚠️</span>
-            <div class="activity-content">
-                <p>System backup completed</p>
-                <span class="activity-time">3 hours ago</span>
-            </div>
-        </div>
-    `;
+async function loadSystemActivity() {
+    try {
+        const activities = await apiCall('/api/admin/activities');
+        const activityList = document.getElementById('systemActivity');
+        activityList.innerHTML = '';
+        
+        if (activities && activities.length > 0) {
+            activities.slice(0, 10).forEach(activity => {
+                const activityItem = document.createElement('div');
+                activityItem.className = 'activity-item';
+                
+                // Determine icon based on activity type
+                let icon = '📝';
+                if (activity.activityType === 'USER_REGISTRATION') icon = '👤';
+                else if (activity.activityType === 'ASSIGNMENT_CREATED') icon = '📄';
+                else if (activity.activityType === 'ASSIGNMENT_SUBMITTED') icon = '✅';
+                else if (activity.activityType === 'QUIZ_CREATED') icon = '�';
+                else if (activity.activityType === 'QUIZ_ATTEMPTED') icon = '✏️';
+                else if (activity.activityType === 'COURSE_CREATED') icon = '📚';
+                else if (activity.activityType === 'ENROLLMENT_CREATED') icon = '🎓';
+                else if (activity.activityType === 'ATTENDANCE_MARKED') icon = '📋';
+                
+                const timeAgo = getTimeAgo(activity.createdAt);
+                
+                activityItem.innerHTML = `
+                    <span class="activity-icon">${icon}</span>
+                    <div class="activity-content">
+                        <p>${activity.description}</p>
+                        <span class="activity-time">${timeAgo}</span>
+                    </div>
+                `;
+                activityList.appendChild(activityItem);
+            });
+        } else {
+            activityList.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 20px;">No recent activity</p>';
+        }
+    } catch (error) {
+        console.error('Error loading activities:', error);
+        document.getElementById('systemActivity').innerHTML = '<p style="text-align: center; color: var(--danger-color);">Failed to load activities</p>';
+    }
+}
+
+function getTimeAgo(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const seconds = Math.floor((now - date) / 1000);
+    
+    if (seconds < 60) return 'just now';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 30) return `${days} day${days > 1 ? 's' : ''} ago`;
+    const months = Math.floor(days / 30);
+    return `${months} month${months > 1 ? 's' : ''} ago`;
 }
 
 function loadUserChart() {
