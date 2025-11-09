@@ -340,3 +340,14 @@ function startNotificationPolling() {
 }
 
 document.addEventListener('DOMContentLoaded', startNotificationPolling);
+
+// Set up logout button listener
+document.addEventListener('DOMContentLoaded', function() {
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            logout();
+        });
+    }
+});

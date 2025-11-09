@@ -41,8 +41,26 @@
                 </button>
             </div>
 
-            <div class="courses-grid" id="coursesList" style="padding: 1rem 0;">
-                <!-- Courses will be loaded here -->
+            <div class="dashboard-card" style="padding: 1.5rem; margin-top: 1rem;">
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Course Code</th>
+                                <th>Course Name</th>
+                                <th>Credits</th>
+                                <th>Students</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="coursesList">
+                            <!-- Courses will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </main>

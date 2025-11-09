@@ -33,34 +33,63 @@ async function loadInstructorCourses() {
             return;
         }
         
-        const response = await apiCall(`/api/courses/instructor/${user.id}`);
-        if (!response.ok) throw new Error('Failed to load courses');
-        
-        allCourses = await response.json();
+        const courses = await apiCall(`/api/courses/instructor/${user.id}`);
+        allCourses = courses;
         displayCourses(allCourses);
     } catch (error) {
         console.error('Error loading courses:', error);
-        const grid = document.getElementById('coursesList');
-        if (grid) {
-            grid.innerHTML = '<p class="empty-state">Failed to load courses. Please try again.</p>';
+        const tbody = document.getElementById('coursesList');
+        if (tbody) {
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center">Failed to load courses. Please try again.</td></tr>';
         }
     }
 }
 
 function displayCourses(courses) {
-    const grid = document.getElementById('coursesList');
-    if (!grid) return;
+    const tbody = document.getElementById('coursesList');
+    if (!tbody) return;
     
-    grid.innerHTML = '';
+    tbody.innerHTML = '';
     
     if (courses.length === 0) {
-        grid.innerHTML = '<p class="empty-state">No courses yet. Create your first course!</p>';
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center">No courses yet. Create your first course!</td></tr>';
         return;
     }
     
     courses.forEach(course => {
-        const courseCard = createCourseCard(course);
-        grid.appendChild(courseCard);
+        const row = document.createElement('tr');
+        
+        const startDate = course.startDate ? new Date(course.startDate).toLocaleDateString() : 'N/A';
+        const endDate = course.endDate ? new Date(course.endDate).toLocaleDateString() : 'N/A';
+        const enrollmentCount = course.enrollments?.length || 0;
+        const today = new Date();
+        const start = course.startDate ? new Date(course.startDate) : null;
+        const end = course.endDate ? new Date(course.endDate) : null;
+        
+        let status = 'Active';
+        let statusClass = 'success';
+        if (start && today < start) {
+            status = 'Upcoming';
+            statusClass = 'info';
+        } else if (end && today > end) {
+            status = 'Completed';
+            statusClass = 'secondary';
+        }
+        
+        row.innerHTML = `
+            <td>${course.courseCode}</td>
+            <td>${course.courseName}</td>
+            <td>${course.credits}</td>
+            <td>${enrollmentCount} / ${course.maxStudents}</td>
+            <td>${startDate}</td>
+            <td>${endDate}</td>
+            <td><span class="badge badge-${statusClass}">${status}</span></td>
+            <td>
+                <button class="btn btn-sm btn-secondary" onclick="viewCourse(${course.id})">View</button>
+                <button class="btn btn-sm btn-primary" onclick="editCourse(${course.id})">Edit</button>
+            </td>
+        `;
+        tbody.appendChild(row);
     });
 }
 
@@ -107,6 +136,10 @@ function createCourseCard(course) {
 }
 
 function viewCourseDetails(courseId) {
+    showToast('Course details view coming soon', 'info');
+}
+
+function viewCourse(courseId) {
     showToast('Course details view coming soon', 'info');
 }
 
@@ -176,10 +209,7 @@ async function loadInstructorAssignments() {
             return;
         }
         
-        const coursesResponse = await apiCall(`/api/courses/instructor/${user.id}`);
-        if (!coursesResponse.ok) throw new Error('Failed to load courses');
-        
-        const courses = await coursesResponse.json();
+        const courses = await apiCall(`/api/courses/instructor/${user.id}`);
         const tbody = document.getElementById('assignmentsList');
         if (!tbody) return;
         
@@ -189,32 +219,29 @@ async function loadInstructorAssignments() {
         
         for (const course of courses) {
             try {
-                const assignmentsResponse = await apiCall(`/api/assignments/course/${course.id}`);
-                if (assignmentsResponse.ok) {
-                    const assignments = await assignmentsResponse.json();
+                const assignments = await apiCall(`/api/assignments/course/${course.id}`);
+                
+                assignments.forEach(assignment => {
+                    hasAssignments = true;
+                    const row = document.createElement('tr');
                     
-                    assignments.forEach(assignment => {
-                        hasAssignments = true;
-                        const row = document.createElement('tr');
-                        
-                        const dueDate = assignment.dueDate ? new Date(assignment.dueDate).toLocaleString() : 'N/A';
-                        const submissionCount = assignment.submissions?.length || 0;
-                        
-                        row.innerHTML = `
-                            <td>${assignment.title}</td>
-                            <td>${course.courseName}</td>
-                            <td>${dueDate}</td>
-                            <td>${assignment.maxPoints}</td>
-                            <td>${submissionCount}</td>
-                            <td><span class="badge badge-success">Active</span></td>
-                            <td>
-                                <button class="btn btn-sm btn-secondary" onclick="viewAssignment(${assignment.id})">View</button>
-                                <button class="btn btn-sm btn-primary" onclick="gradeSubmissions(${assignment.id})">Grade</button>
-                            </td>
-                        `;
-                        tbody.appendChild(row);
-                    });
-                }
+                    const dueDate = assignment.dueDate ? new Date(assignment.dueDate).toLocaleString() : 'N/A';
+                    const submissionCount = assignment.submissions?.length || 0;
+                    
+                    row.innerHTML = `
+                        <td>${assignment.title}</td>
+                        <td>${course.courseName}</td>
+                        <td>${dueDate}</td>
+                        <td>${assignment.maxPoints}</td>
+                        <td>${submissionCount}</td>
+                        <td><span class="badge badge-success">Active</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary" onclick="viewAssignment(${assignment.id})">View</button>
+                            <button class="btn btn-sm btn-primary" onclick="gradeSubmissions(${assignment.id})">Grade</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
             } catch (err) {
                 console.warn('Failed to load assignments for course', course.id, err);
             }
@@ -301,10 +328,7 @@ async function loadInstructorQuizzes() {
             return;
         }
         
-        const coursesResponse = await apiCall(`/api/courses/instructor/${user.id}`);
-        if (!coursesResponse.ok) throw new Error('Failed to load courses');
-        
-        const courses = await coursesResponse.json();
+        const courses = await apiCall(`/api/courses/instructor/${user.id}`);
         const tbody = document.getElementById('quizzesList');
         if (!tbody) return;
         
@@ -314,31 +338,28 @@ async function loadInstructorQuizzes() {
         
         for (const course of courses) {
             try {
-                const quizzesResponse = await apiCall(`/api/quizzes/course/${course.id}`);
-                if (quizzesResponse.ok) {
-                    const quizzes = await quizzesResponse.json();
+                const quizzes = await apiCall(`/api/quizzes/course/${course.id}`);
+                
+                quizzes.forEach(quiz => {
+                    hasQuizzes = true;
+                    const row = document.createElement('tr');
                     
-                    quizzes.forEach(quiz => {
-                        hasQuizzes = true;
-                        const row = document.createElement('tr');
-                        
-                        const questionCount = quiz.questions?.length || 0;
-                        
-                        row.innerHTML = `
-                            <td>${quiz.title}</td>
-                            <td>${course.courseName}</td>
-                            <td>${quiz.duration} min</td>
-                            <td>${quiz.totalPoints}</td>
-                            <td>${questionCount}</td>
-                            <td><span class="badge badge-success">Active</span></td>
-                            <td>
-                                <button class="btn btn-sm btn-secondary" onclick="viewQuiz(${quiz.id})">View</button>
-                                <button class="btn btn-sm btn-primary" onclick="viewAttempts(${quiz.id})">Attempts</button>
-                            </td>
-                        `;
-                        tbody.appendChild(row);
-                    });
-                }
+                    const questionCount = quiz.questions?.length || 0;
+                    
+                    row.innerHTML = `
+                        <td>${quiz.title}</td>
+                        <td>${course.courseName}</td>
+                        <td>${quiz.duration} min</td>
+                        <td>${quiz.totalPoints}</td>
+                        <td>${questionCount}</td>
+                        <td><span class="badge badge-success">Active</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary" onclick="viewQuiz(${quiz.id})">View</button>
+                            <button class="btn btn-sm btn-primary" onclick="viewAttempts(${quiz.id})">Attempts</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
             } catch (err) {
                 console.warn('Failed to load quizzes for course', course.id, err);
             }
@@ -512,19 +533,14 @@ async function loadStats() {
     try {
         const user = getCurrentUser();
         
-        const coursesResponse = await apiCall(`/api/courses/instructor/${user.id}`);
-        if (!coursesResponse.ok) throw new Error('Failed to load courses');
-        const courses = await coursesResponse.json();
+        const courses = await apiCall(`/api/courses/instructor/${user.id}`);
         document.getElementById('totalCourses').textContent = courses.length || 0;
         
         let totalStudents = 0;
         for (const course of courses) {
             try {
-                const enrollmentsResponse = await apiCall(`/api/enrollments/course/${course.id}`);
-                if (enrollmentsResponse.ok) {
-                    const enrollments = await enrollmentsResponse.json();
-                    totalStudents += enrollments.length;
-                }
+                const enrollments = await apiCall(`/api/enrollments/course/${course.id}`);
+                totalStudents += enrollments.length;
             } catch (err) {
                 console.warn('Failed to load enrollments for course', course.id);
             }
@@ -534,11 +550,8 @@ async function loadStats() {
         let pendingCount = 0;
         for (const course of courses) {
             try {
-                const submissionsResponse = await apiCall(`/api/assignments/course/${course.id}/submissions`);
-                if (submissionsResponse.ok) {
-                    const submissions = await submissionsResponse.json();
-                    pendingCount += submissions.filter(s => s.status === 'SUBMITTED').length;
-                }
+                const submissions = await apiCall(`/api/assignments/course/${course.id}/submissions`);
+                pendingCount += submissions.filter(s => s.status === 'SUBMITTED').length;
             } catch (err) {
                 console.warn('Failed to load submissions for course', course.id);
             }
@@ -805,11 +818,13 @@ async function loadCoursesForDropdown(selectId) {
 // ==================== MODAL CONTROLS ====================
 function openCreateCourseModal() {
     document.getElementById('createCourseModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
 }
 
 function closeCreateCourseModal() {
     document.getElementById('createCourseModal').style.display = 'none';
     document.getElementById('createCourseForm').reset();
+    document.body.style.overflow = 'auto';
 }
 
 function openCreateAssignmentModal() {
@@ -817,6 +832,7 @@ function openCreateAssignmentModal() {
     if (modal) {
         modal.style.display = 'block';
         loadCoursesForDropdown('assignmentCourse');
+        document.body.style.overflow = 'hidden';
     }
 }
 
@@ -825,6 +841,7 @@ function closeCreateAssignmentModal() {
     if (modal) {
         modal.style.display = 'none';
         document.getElementById('createAssignmentForm').reset();
+        document.body.style.overflow = 'auto';
     }
 }
 
@@ -835,6 +852,7 @@ function openCreateQuizModal() {
         loadCoursesForDropdown('quizCourse');
         document.getElementById('questionsContainer').innerHTML = '';
         questionCount = 0;
+        document.body.style.overflow = 'hidden';
     }
 }
 
@@ -845,6 +863,7 @@ function closeCreateQuizModal() {
         document.getElementById('createQuizForm').reset();
         document.getElementById('questionsContainer').innerHTML = '';
         questionCount = 0;
+        document.body.style.overflow = 'auto';
     }
 }
 

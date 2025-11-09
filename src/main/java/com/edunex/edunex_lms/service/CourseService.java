@@ -23,7 +23,8 @@ public class CourseService {
         User instructor = userRepository.findById(instructorId)
             .orElseThrow(() -> new RuntimeException("Instructor not found"));
         
-        if (!instructor.getRole().equals("INSTRUCTOR") && !instructor.getRole().equals("ADMIN")) {
+        User.Role role = instructor.getRole();
+        if (role != User.Role.INSTRUCTOR && role != User.Role.ADMIN) {
             throw new RuntimeException("Only instructors can create courses");
         }
         
