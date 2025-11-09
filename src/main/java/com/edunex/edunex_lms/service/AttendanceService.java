@@ -23,6 +23,11 @@ public class AttendanceService {
     
     @Transactional
     public Attendance markAttendance(Long studentId, Long courseId, String status) {
+        return markAttendance(studentId, courseId, status, null, null);
+    }
+    
+    @Transactional
+    public Attendance markAttendance(Long studentId, Long courseId, String status, String remarks, Long markedById) {
         User student = userRepository.findById(studentId)
             .orElseThrow(() -> new RuntimeException("Student not found"));
         
@@ -41,6 +46,13 @@ public class AttendanceService {
         attendance.setCourse(course);
         attendance.setAttendanceDate(today);
         attendance.setStatus(Attendance.AttendanceStatus.valueOf(status.toUpperCase()));
+        attendance.setRemarks(remarks);
+        
+        if (markedById != null) {
+            User markedBy = userRepository.findById(markedById)
+                .orElseThrow(() -> new RuntimeException("Marker not found"));
+            attendance.setMarkedBy(markedBy);
+        }
         
         return attendanceRepository.save(attendance);
     }
@@ -65,9 +77,13 @@ public class AttendanceService {
         }
         
         long presentCount = attendances.stream()
-            .filter(a -> a.getStatus().equals("PRESENT"))
+            .filter(a -> a.getStatus() == Attendance.AttendanceStatus.PRESENT)
             .count();
         
         return (double) presentCount / attendances.size() * 100;
+    }
+    
+    public List<Attendance> getAttendanceByDate(Long courseId, LocalDate date) {
+        return attendanceRepository.findByCourseIdAndDate(courseId, date);
     }
 }
