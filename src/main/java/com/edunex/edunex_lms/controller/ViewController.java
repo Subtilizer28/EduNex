@@ -68,23 +68,23 @@ public class ViewController {
         return "student/dashboard";
     }
     
-    @GetMapping("/courses")
+    @GetMapping("/student/courses")
     public String courses() {
-        return "courses";
+        return "student/courses";
     }
     
-    @GetMapping("/profile")
+    @GetMapping("/student/profile")
     public String profile() {
-        return "profile";
+        return "student/profile";
     }
     
-    @GetMapping("/assignments")
+    @GetMapping("/student/assignments")
     public String assignments() {
-        return "assignments";
+        return "student/assignments";
     }
     
-    @GetMapping("/quizzes")
+    @GetMapping("/student/quizzes")
     public String quizzes() {
-        return "quizzes";
+        return "student/quizzes";
     }
 }
