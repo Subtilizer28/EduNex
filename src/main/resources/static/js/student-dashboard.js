@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadDashboardStats();
     await loadCourses();
     await loadAssignments();
+    await loadAttendanceOverview();
     checkAIAvailability();
     initializeChart();
 });
@@ -212,3 +213,70 @@ function initializeChart() {
         }
     });
 }
+
+// Load Attendance Overview
+async function loadAttendanceOverview() {
+    const container = document.getElementById('attendanceOverview');
+    const user = EduNex.getCurrentUser();
+    
+    try {
+        const data = await EduNex.apiCall(`/api/attendance/my-attendance`, 'GET');
+        const courseAttendance = data.courseAttendance;
+        
+        if (!courseAttendance || Object.keys(courseAttendance).length === 0) {
+            container.innerHTML = '<div class="empty-state"><p>No attendance records yet</p></div>';
+            return;
+        }
+        
+        let totalRate = 0;
+        let courseCount = 0;
+        
+        const html = `
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;">
+                ${Object.values(courseAttendance).map(course => {
+                    totalRate += course.rate;
+                    courseCount++;
+                    return `
+                        <div style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
+                            <h4 style="margin-bottom: 0.5rem;">${course.courseCode}</h4>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">${course.courseName}</p>
+                            <div style="margin-bottom: 0.5rem;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                                    <span>Attendance Rate</span>
+                                    <strong>${course.rate.toFixed(1)}%</strong>
+                                </div>
+                                <div style="height: 8px; background-color: var(--border-color); border-radius: 4px; overflow: hidden;">
+                                    <div style="width: ${course.rate}%; height: 100%; background-color: ${getAttendanceColor(course.rate)};"></div>
+                                </div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: var(--text-secondary);">
+                                <span>Present: ${course.present}</span>
+                                <span>Absent: ${course.absent}</span>
+                                <span>Total: ${course.total}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+        
+        container.innerHTML = html;
+        
+        // Update overall attendance rate
+        if (courseCount > 0) {
+            const avgRate = (totalRate / courseCount).toFixed(1);
+            document.getElementById('attendanceRate').textContent = avgRate + '%';
+        }
+        
+    } catch (error) {
+        console.error('Error loading attendance:', error);
+        container.innerHTML = '<div class="empty-state"><p>Failed to load attendance data</p></div>';
+    }
+}
+
+function getAttendanceColor(rate) {
+    if (rate >= 80) return 'var(--success)';
+    if (rate >= 60) return 'var(--warning)';
+    return 'var(--danger)';
+}
+

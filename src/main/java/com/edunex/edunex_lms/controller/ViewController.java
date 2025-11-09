@@ -33,6 +33,11 @@ public class ViewController {
         return "admin/courses";
     }
     
+    @GetMapping("/admin/attendance")
+    public String adminAttendance() {
+        return "admin/attendance";
+    }
+    
     @GetMapping("/instructor/dashboard")
     public String instructorDashboard() {
         return "instructor/dashboard";
@@ -51,6 +56,11 @@ public class ViewController {
     @GetMapping("/instructor/quizzes")
     public String instructorQuizzes() {
         return "instructor/quizzes";
+    }
+    
+    @GetMapping("/instructor/attendance")
+    public String instructorAttendance() {
+        return "instructor/attendance";
     }
     
     @GetMapping("/student/dashboard")

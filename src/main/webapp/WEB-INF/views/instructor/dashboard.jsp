@@ -18,6 +18,7 @@
                 <li class="nav-item"><a href="/instructor/courses" class="nav-link"><i class="fas fa-book"></i> Courses</a></li>
                 <li class="nav-item"><a href="/instructor/assignments" class="nav-link"><i class="fas fa-tasks"></i> Assignments</a></li>
                 <li class="nav-item"><a href="/instructor/quizzes" class="nav-link"><i class="fas fa-clipboard-check"></i> Quizzes</a></li>
+                <li class="nav-item"><a href="/instructor/attendance" class="nav-link"><i class="fas fa-user-check"></i> Attendance</a></li>
                 <li class="nav-item"><a href="/profile" class="nav-link"><i class="fas fa-user"></i> Profile</a></li>
                 <li class="nav-item"><a href="#" id="logoutBtn" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>

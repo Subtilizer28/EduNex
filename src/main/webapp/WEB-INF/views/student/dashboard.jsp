@@ -116,6 +116,16 @@
                     </table>
                 </div>
             </div>
+            
+            <!-- Attendance Overview -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Attendance Overview</h3>
+                </div>
+                <div id="attendanceOverview" style="padding: 1.5rem;">
+                    <div style="text-align: center;">Loading...</div>
+                </div>
+            </div>
         </div>
     </main>
     

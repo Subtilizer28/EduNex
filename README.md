@@ -21,6 +21,7 @@
 - **User Management**: Create, activate, deactivate, and delete users
 - **Course Oversight**: View all courses and system-wide statistics
 - **Instructor Assignment**: Assign instructors to courses
+- **Attendance Oversight**: View all attendance records with filtering by course and date
 - **System Activity Logs**: Real-time tracking of system events (user registration, course creation, quiz/assignment activities)
 - **Dashboard Analytics**: User statistics, course metrics, enrollment tracking
 - **Recent Users**: View last 10 newly registered users
@@ -30,7 +31,7 @@
 - **Assignment Creation**: Create assignments with modals, set due dates and points
 - **Quiz Management**: Create quizzes with dynamic question builder (multiple questions with multiple choice options)
 - **Student Enrollment**: Enroll students in courses
-- **Attendance Tracking**: Mark student attendance by date
+- **Attendance Management**: Mark student attendance for courses with status (Present, Absent, Late, Excused)
 - **Grading System**: Grade student assignments and quiz attempts
 - **Dashboard Analytics**: Course statistics, student performance, pending grading count
 - **Scrollable Modals**: All creation modals are scrollable with background lock
@@ -40,8 +41,8 @@
 - **Assignment Submission**: Submit assignments with file support
 - **Timed Quizzes**: Take quizzes with automatic timer and submission
 - **Grade Viewing**: Track grades and academic progress
-- **Attendance Records**: View attendance history
-- **Dashboard**: Personalized student dashboard with course overview
+- **Attendance Viewing**: View attendance records per course with attendance rate
+- **Dashboard**: Personalized student dashboard with course overview and attendance statistics
 
 #### 🎨 UI/UX Features
 - **Dark Mode Interface**: Modern dark theme with accent colors
@@ -91,7 +92,7 @@ Before running the application, ensure you have:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/Subtilizer28/EduNex.git
+git clone https://github.com/ashtonmths/EduNex.git
 cd EduNex
 ```
 
@@ -365,8 +366,14 @@ POST   /api/enrollments                    # Enroll student (Instructor)
 
 ### Attendance APIs
 ```
-GET    /api/attendance/course/{id}         # Get attendance by course
-POST   /api/attendance                     # Mark attendance (Instructor)
+GET    /api/attendance/student/{id}                  # Get attendance by student
+GET    /api/attendance/course/{id}                   # Get attendance by course
+GET    /api/attendance/student/{studentId}/course/{courseId}  # Get attendance by student and course
+GET    /api/attendance/student/{studentId}/course/{courseId}/rate  # Get attendance rate
+GET    /api/attendance/my-attendance                 # Get current student's attendance (Student)
+GET    /api/attendance/course/{courseId}/date/{date} # Get attendance by date
+POST   /api/attendance/mark                          # Mark single attendance (Instructor/Admin)
+POST   /api/attendance/mark-multiple                 # Mark multiple attendance (Instructor/Admin)
 ```
 
 ---
@@ -451,9 +458,11 @@ The application uses JPA/Hibernate with auto-DDL enabled (`spring.jpa.hibernate.
 - `student_id` (BIGINT, FK → users)
 - `course_id` (BIGINT, FK → courses)
 - `attendance_date` (DATE)
-- `status` (VARCHAR: PRESENT, ABSENT, LATE)
-- `marked_by` (BIGINT, FK → users)
+- `status` (ENUM: PRESENT, ABSENT, LATE, EXCUSED)
+- `remarks` (VARCHAR, optional)
+- `marked_by` (BIGINT, FK → users, optional)
 - `marked_at` (TIMESTAMP)
+- UNIQUE constraint on (student_id, course_id, attendance_date)
 
 #### activity_logs
 - `id` (BIGINT, PK)
@@ -708,10 +717,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 📞 Support
 
 For issues or questions:
-- **GitHub Issues**: [Open an issue](https://github.com/Subtilizer28/EduNex/issues)
+- **GitHub Issues**: [Open an issue](https://github.com/ashtonmths/EduNex/issues)
 - **Documentation**: Check this README and QUICKSTART.md
-- **Email**: support@edunex.com (if available)
-
 ---
 
 ## 🙏 Acknowledgments
