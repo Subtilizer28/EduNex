@@ -31,10 +31,6 @@
                 <div id="errorMessage" class="error-message"></div>
                 
                 <button type="submit" class="btn btn-primary">Login</button>
-                
-                <p class="auth-footer">
-                    Don't have an account? <a href="/register">Register here</a>
-                </p>
             </form>
         </div>
     </div>
