@@ -38,6 +38,21 @@ public class ViewController {
         return "instructor/dashboard";
     }
     
+    @GetMapping("/instructor/courses")
+    public String instructorCourses() {
+        return "instructor/courses";
+    }
+    
+    @GetMapping("/instructor/assignments")
+    public String instructorAssignments() {
+        return "instructor/assignments";
+    }
+    
+    @GetMapping("/instructor/quizzes")
+    public String instructorQuizzes() {
+        return "instructor/quizzes";
+    }
+    
     @GetMapping("/student/dashboard")
     public String studentDashboard() {
         return "student/dashboard";
