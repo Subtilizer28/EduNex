@@ -43,6 +43,9 @@ public class User {
     @Column(nullable = false, length = 100)
     private String fullName;
     
+    @Column(unique = true, length = 20)
+    private String usn; // University Seat Number - unique identifier for students
+    
     @Column(length = 20)
     private String phoneNumber;
     

@@ -143,6 +143,7 @@
                     <thead>
                         <tr>
                             <th><i class="fas fa-hashtag"></i> ID</th>
+                            <th><i class="fas fa-id-card"></i> USN</th>
                             <th><i class="fas fa-user"></i> Name</th>
                             <th><i class="fas fa-envelope"></i> Email</th>
                             <th><i class="fas fa-user-tag"></i> Role</th>
@@ -155,6 +156,7 @@
                         ${users.map(user => `
                             <tr>
                                 <td>${user.id}</td>
+                                <td>${user.usn || '-'}</td>
                                 <td>${user.fullName || 'N/A'}</td>
                                 <td>${user.email}</td>
                                 <td><span class="badge badge-${user.role.toLowerCase()}">${user.role}</span></td>
@@ -307,7 +309,7 @@
             }
 
             try {
-                await apiCall('/api/enrollments', {
+                await apiCall('/api/enrollments/enroll', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

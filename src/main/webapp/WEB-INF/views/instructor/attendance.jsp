@@ -145,7 +145,7 @@
             }
 
             let tableHTML = '<table class="data-table"><thead><tr>';
-            tableHTML += '<th><i class="fas fa-hashtag"></i> ID</th>';
+            tableHTML += '<th><i class="fas fa-id-card"></i> USN</th>';
             tableHTML += '<th><i class="fas fa-user"></i> Name</th>';
             tableHTML += '<th><i class="fas fa-envelope"></i> Email</th>';
             tableHTML += '<th><i class="fas fa-chart-line"></i> Attendance Rate</th>';
@@ -153,7 +153,7 @@
             
             students.forEach(student => {
                 tableHTML += '<tr>';
-                tableHTML += '<td>' + student.id + '</td>';
+                tableHTML += '<td>' + (student.usn || 'N/A') + '</td>';
                 tableHTML += '<td>' + student.fullName + '</td>';
                 tableHTML += '<td>' + student.email + '</td>';
                 tableHTML += '<td id="rate-' + student.id + '">Loading...</td>';
@@ -205,6 +205,7 @@
             attendance.sort((a, b) => new Date(b.attendanceDate) - new Date(a.attendanceDate));
 
             let tableHTML = '<table class="data-table"><thead><tr>';
+            tableHTML += '<th><i class="fas fa-id-card"></i> USN</th>';
             tableHTML += '<th><i class="fas fa-user"></i> Student</th>';
             tableHTML += '<th><i class="fas fa-calendar"></i> Date</th>';
             tableHTML += '<th><i class="fas fa-check-circle"></i> Status</th>';
@@ -213,6 +214,7 @@
             
             attendance.forEach(record => {
                 tableHTML += '<tr>';
+                tableHTML += '<td>' + (record.student?.usn || 'N/A') + '</td>';
                 tableHTML += '<td>' + (record.student?.fullName || 'N/A') + '</td>';
                 tableHTML += '<td>' + formatDate(record.attendanceDate) + '</td>';
                 tableHTML += '<td><span class="badge badge-' + getStatusColor(record.status) + '">' + record.status + '</span></td>';
@@ -237,6 +239,7 @@
                 listHTML += '<div class="attendance-item" style="display: grid; grid-template-columns: 2fr 1fr 2fr; gap: 1rem; padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 1rem;">';
                 listHTML += '<div>';
                 listHTML += '<strong>' + student.fullName + '</strong><br>';
+                listHTML += '<small style="color: var(--text-secondary);">USN: ' + (student.usn || 'N/A') + '</small><br>';
                 listHTML += '<small style="color: var(--text-secondary);">' + student.email + '</small>';
                 listHTML += '</div>';
                 listHTML += '<div class="form-group" style="margin: 0;">';

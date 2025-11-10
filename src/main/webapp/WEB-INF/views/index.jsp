@@ -107,12 +107,17 @@
         // Check if user is logged in and update UI
         document.addEventListener('DOMContentLoaded', function() {
             const token = localStorage.getItem('token');
-            const user = getCurrentUser();
+            const userStr = localStorage.getItem('user');
             
-            if (token && user) {
+            if (token && userStr) {
+                const user = JSON.parse(userStr);
+                
                 // Hide login nav and button
                 document.getElementById('loginNavItem').style.display = 'none';
-                document.getElementById('heroLoginBtn').style.display = 'none';
+                const heroLoginBtn = document.getElementById('heroLoginBtn');
+                if (heroLoginBtn) {
+                    heroLoginBtn.style.display = 'none';
+                }
                 
                 // Show logout nav
                 document.getElementById('logoutNavItem').style.display = 'flex';
@@ -122,17 +127,18 @@
                 const dashboardLink = document.getElementById('dashboardLink');
                 dashboardNavItem.style.display = 'flex';
                 
+                let dashboardUrl = '/student/dashboard';
                 if (user.role === 'ADMIN') {
-                    dashboardLink.href = '/admin/dashboard';
+                    dashboardUrl = '/admin/dashboard';
                 } else if (user.role === 'INSTRUCTOR') {
-                    dashboardLink.href = '/instructor/dashboard';
-                } else {
-                    dashboardLink.href = '/student/dashboard';
+                    dashboardUrl = '/instructor/dashboard';
                 }
+                
+                dashboardLink.href = dashboardUrl;
                 
                 // Replace hero button with dashboard button
                 const heroButtons = document.getElementById('heroButtons');
-                heroButtons.innerHTML = `<a href="${dashboardLink.href}" class="btn btn-primary btn-large"><i class="fas fa-chart-line"></i> Go to Dashboard</a>`;
+                heroButtons.innerHTML = '<a href="' + dashboardUrl + '" class="btn btn-primary btn-large"><i class="fas fa-chart-line"></i> Go to Dashboard</a>';
             }
         });
     </script>

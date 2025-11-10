@@ -109,8 +109,70 @@
         </div>
     </div>
 
+    <!-- View/Edit Course Modal -->
+    <div id="viewEditCourseModal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <span class="close" onclick="closeViewEditCourseModal()">&times;</span>
+            <h2 id="viewEditModalTitle">Course Details</h2>
+            <div id="viewEditCourseContent">
+                <!-- Course details and edit form will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Enrollment Modal -->
+    <div id="bulkEnrollModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>Bulk Enroll Students</h3>
+                <span class="close" onclick="closeBulkEnrollModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p><strong>Course:</strong> <span id="bulkEnrollCourseName"></span></p>
+                <form id="bulkEnrollForm" onsubmit="event.preventDefault(); submitBulkEnroll();">
+                    <div class="form-group">
+                        <label for="usnPrefix">USN Prefix:</label>
+                        <input type="text" id="usnPrefix" class="form-control" 
+                               placeholder="e.g., NNM23CS" required 
+                               style="text-transform: uppercase;">
+                        <small class="form-text text-muted">
+                            The prefix part of the USN (e.g., NNM23CS)
+                        </small>
+                    </div>
+                    <div class="form-group">
+                        <label for="startRange">Start Range:</label>
+                        <input type="number" id="startRange" class="form-control" 
+                               placeholder="e.g., 0" required min="0" max="999">
+                        <small class="form-text text-muted">
+                            Starting number (will be zero-padded to 3 digits)
+                        </small>
+                    </div>
+                    <div class="form-group">
+                        <label for="endRange">End Range:</label>
+                        <input type="number" id="endRange" class="form-control" 
+                               placeholder="e.g., 360" required min="0" max="999">
+                        <small class="form-text text-muted">
+                            Ending number (inclusive, max 500 students per batch)
+                        </small>
+                    </div>
+                    <div class="form-group">
+                        <small class="form-text text-muted">
+                            <strong>Example:</strong> Prefix "NNM23CS" with range 0-360 will enroll students with USNs: NNM23CS000, NNM23CS001, ..., NNM23CS360
+                        </small>
+                    </div>
+                </form>
+                <div id="bulkEnrollResult" style="display: none; margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeBulkEnrollModal()">Close</button>
+                <button type="button" id="submitBulkEnroll" class="btn btn-success" onclick="submitBulkEnroll()">Enroll Students</button>
+            </div>
+        </div>
+    </div>
+
     <script src="<c:url value='/js/main.js'/>"></script>
     <script src="<c:url value='/js/auth.js'/>"></script>
     <script src="<c:url value='/js/instructor.js'/>"></script>
 </body>
 </html>
+

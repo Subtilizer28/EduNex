@@ -136,15 +136,252 @@ function createCourseCard(course) {
 }
 
 function viewCourseDetails(courseId) {
-    showToast('Course details view coming soon', 'info');
+    viewCourse(courseId);
 }
 
 function viewCourse(courseId) {
-    showToast('Course details view coming soon', 'info');
+    const course = allCourses.find(c => c.id === courseId);
+    if (!course) {
+        showToast('Course not found', 'error');
+        return;
+    }
+
+    document.getElementById('viewEditModalTitle').textContent = 'Course Details';
+    const content = document.getElementById('viewEditCourseContent');
+    
+    const enrollmentCount = course.enrollments?.length || 0;
+    const startDate = course.startDate ? new Date(course.startDate).toLocaleDateString() : 'N/A';
+    const endDate = course.endDate ? new Date(course.endDate).toLocaleDateString() : 'N/A';
+    
+    content.innerHTML = `
+        <div class="course-details">
+            <div class="detail-group">
+                <label>Course Name:</label>
+                <p>${course.courseName}</p>
+            </div>
+            <div class="detail-group">
+                <label>Course Code:</label>
+                <p>${course.courseCode}</p>
+            </div>
+            <div class="detail-group">
+                <label>Description:</label>
+                <p>${course.description || 'N/A'}</p>
+            </div>
+            <div class="detail-row">
+                <div class="detail-group">
+                    <label>Credits:</label>
+                    <p>${course.credits}</p>
+                </div>
+                <div class="detail-group">
+                    <label>Enrollments:</label>
+                    <p>${enrollmentCount} / ${course.maxStudents}</p>
+                </div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-group">
+                    <label>Start Date:</label>
+                    <p>${startDate}</p>
+                </div>
+                <div class="detail-group">
+                    <label>End Date:</label>
+                    <p>${endDate}</p>
+                </div>
+            </div>
+            <div class="modal-actions" style="margin-top: 2rem; display: flex; gap: 1rem;">
+                <button class="btn btn-primary" onclick="editCourse(${course.id})">Edit Course</button>
+                <button class="btn btn-success" onclick="openBulkEnrollModal(${course.id}, '${course.courseName}')">Bulk Enroll</button>
+                <button class="btn btn-secondary" onclick="closeViewEditCourseModal()">Close</button>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('viewEditCourseModal').style.display = 'block';
 }
 
 function editCourse(courseId) {
-    showToast('Edit course functionality coming soon', 'info');
+    const course = allCourses.find(c => c.id === courseId);
+    if (!course) {
+        showToast('Course not found', 'error');
+        return;
+    }
+
+    document.getElementById('viewEditModalTitle').textContent = 'Edit Course';
+    const content = document.getElementById('viewEditCourseContent');
+    
+    const startDate = course.startDate ? new Date(course.startDate).toISOString().split('T')[0] : '';
+    const endDate = course.endDate ? new Date(course.endDate).toISOString().split('T')[0] : '';
+    
+    content.innerHTML = `
+        <form id="editCourseForm" style="padding: 1rem 0;">
+            <div class="form-group">
+                <label for="editCourseName">Course Name</label>
+                <input type="text" id="editCourseName" value="${course.courseName}" required>
+            </div>
+            <div class="form-group">
+                <label for="editCourseCode">Course Code</label>
+                <input type="text" id="editCourseCode" value="${course.courseCode}" required>
+            </div>
+            <div class="form-group">
+                <label for="editDescription">Description</label>
+                <textarea id="editDescription" rows="4" required>${course.description || ''}</textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="editCredits">Credits</label>
+                    <input type="number" id="editCredits" value="${course.credits}" min="1" max="6" required>
+                </div>
+                <div class="form-group">
+                    <label for="editMaxStudents">Max Students</label>
+                    <input type="number" id="editMaxStudents" value="${course.maxStudents}" min="1" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="editStartDate">Start Date</label>
+                    <input type="date" id="editStartDate" value="${startDate}" required>
+                </div>
+                <div class="form-group">
+                    <label for="editEndDate">End Date</label>
+                    <input type="date" id="editEndDate" value="${endDate}" required>
+                </div>
+            </div>
+            <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <button type="button" class="btn btn-secondary" onclick="closeViewEditCourseModal()">Cancel</button>
+            </div>
+        </form>
+    `;
+    
+    document.getElementById('editCourseForm').addEventListener('submit', (e) => handleEditCourse(e, courseId));
+    document.getElementById('viewEditCourseModal').style.display = 'block';
+}
+
+function closeViewEditCourseModal() {
+    document.getElementById('viewEditCourseModal').style.display = 'none';
+}
+
+async function handleEditCourse(e, courseId) {
+    e.preventDefault();
+    
+    const formData = {
+        courseName: document.getElementById('editCourseName').value,
+        courseCode: document.getElementById('editCourseCode').value,
+        description: document.getElementById('editDescription').value,
+        credits: parseInt(document.getElementById('editCredits').value),
+        maxStudents: parseInt(document.getElementById('editMaxStudents').value),
+        startDate: document.getElementById('editStartDate').value,
+        endDate: document.getElementById('editEndDate').value
+    };
+
+    try {
+        await apiCall(`/api/courses/${courseId}`, {
+            method: 'PUT',
+            body: JSON.stringify(formData)
+        });
+        
+        showToast('Course updated successfully', 'success');
+        closeViewEditCourseModal();
+        await loadAllCourses();
+    } catch (error) {
+        console.error('Error updating course:', error);
+        showToast('Failed to update course', 'error');
+    }
+}
+
+let currentCourseId = null;
+let currentCourseName = '';
+
+function openBulkEnrollModal(courseId, courseName) {
+    currentCourseId = courseId;
+    currentCourseName = courseName;
+    document.getElementById('bulkEnrollCourseName').textContent = courseName;
+    document.getElementById('bulkEnrollModal').style.display = 'block';
+    document.getElementById('bulkEnrollResult').style.display = 'none';
+    document.getElementById('bulkEnrollForm').reset();
+}
+
+function closeBulkEnrollModal() {
+    document.getElementById('bulkEnrollModal').style.display = 'none';
+    currentCourseId = null;
+    currentCourseName = '';
+}
+
+function submitBulkEnroll() {
+    const prefix = document.getElementById('usnPrefix').value.trim();
+    const startRange = parseInt(document.getElementById('startRange').value);
+    const endRange = parseInt(document.getElementById('endRange').value);
+
+    if (!prefix) {
+        alert('Please enter a USN prefix');
+        return;
+    }
+
+    if (isNaN(startRange) || isNaN(endRange)) {
+        alert('Please enter valid start and end range numbers');
+        return;
+    }
+
+    if (startRange > endRange) {
+        alert('Start range must be less than or equal to end range');
+        return;
+    }
+
+    if (endRange - startRange > 500) {
+        alert('Range cannot exceed 500 students. Please use smaller batches.');
+        return;
+    }
+
+    const submitBtn = document.getElementById('submitBulkEnroll');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Enrolling...';
+
+    fetch('/api/enrollments/bulk-enroll', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+        },
+        body: JSON.stringify({
+            courseId: currentCourseId,
+            prefix: prefix,
+            startRange: startRange,
+            endRange: endRange
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Enroll Students';
+
+        const resultDiv = document.getElementById('bulkEnrollResult');
+        resultDiv.style.display = 'block';
+        
+        let resultHtml = '<h4>Bulk Enrollment Results</h4>';
+        resultHtml += '<p><strong>Course:</strong> ' + currentCourseName + '</p>';
+        resultHtml += '<p><strong>Total Enrolled:</strong> ' + data.enrolledCount + '</p>';
+        resultHtml += '<p><strong>Already Enrolled:</strong> ' + data.alreadyEnrolledCount + '</p>';
+        resultHtml += '<p><strong>Failed:</strong> ' + data.failedCount + '</p>';
+
+        if (data.failed && data.failed.length > 0) {
+            resultHtml += '<h5>Failed Enrollments:</h5><ul>';
+            data.failed.forEach(fail => {
+                resultHtml += '<li>' + fail.usn + ': ' + fail.reason + '</li>';
+            });
+            resultHtml += '</ul>';
+        }
+
+        resultDiv.innerHTML = resultHtml;
+        document.getElementById('bulkEnrollForm').reset();
+        
+        // Reload courses to update enrollment counts
+        loadAllCourses();
+    })
+    .catch(error => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Enroll Students';
+        console.error('Error:', error);
+        alert('Failed to process bulk enrollment. Please try again.');
+    });
 }
 
 function setupCoursesListeners() {
@@ -572,8 +809,7 @@ async function loadStats() {
 async function loadCourses() {
     try {
         const user = getCurrentUser();
-        const response = await apiCall(`/api/courses/instructor/${user.id}`);
-        const courses = await response.json();
+        const courses = await apiCall(`/api/courses/instructor/${user.id}`);
         
         const coursesList = document.getElementById('coursesList');
         coursesList.innerHTML = '';
@@ -605,9 +841,7 @@ async function loadCourses() {
 async function loadPendingAssignments() {
     try {
         const user = getCurrentUser();
-        const coursesResponse = await apiCall(`/api/courses/instructor/${user.id}`);
-        if (!coursesResponse.ok) throw new Error('Failed to load courses');
-        const courses = await coursesResponse.json();
+        const courses = await apiCall(`/api/courses/instructor/${user.id}`);
         
         const tbody = document.getElementById('pendingAssignments');
         tbody.innerHTML = '';
@@ -616,39 +850,37 @@ async function loadPendingAssignments() {
         
         for (const course of courses) {
             try {
-                const submissionsResponse = await apiCall(`/api/assignments/course/${course.id}/submissions`);
-                if (submissionsResponse.ok) {
-                    const submissions = await submissionsResponse.json();
-                    
-                    submissions.filter(s => s.status === 'SUBMITTED').forEach(submission => {
-                        hasAssignments = true;
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${submission.student?.fullName || 'Unknown Student'}</td>
-                            <td>${course.courseName}</td>
-                            <td>${submission.assignment?.title || 'Assignment'}</td>
-                            <td>${formatDateTime(submission.submittedAt)}</td>
-                            <td><span class="badge badge-warning">Pending</span></td>
-                            <td>
-                                <button class="btn btn-sm btn-primary" onclick="gradeAssignment(${submission.id})">Grade</button>
-                            </td>
-                        `;
-                        tbody.appendChild(row);
-                    });
-                }
+                const submissions = await apiCall(`/api/assignments/course/${course.id}/submissions`);
+                
+                submissions.filter(s => s.status === 'SUBMITTED').forEach(submission => {
+                    hasAssignments = true;
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${submission.student?.usn || 'N/A'}</td>
+                        <td>${submission.student?.fullName || 'Unknown Student'}</td>
+                        <td>${course.courseName}</td>
+                        <td>${submission.assignment?.title || 'Assignment'}</td>
+                        <td>${formatDateTime(submission.submittedAt)}</td>
+                        <td><span class="badge badge-warning">Pending</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" onclick="gradeAssignment(${submission.id})">Grade</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
             } catch (err) {
                 console.warn('Failed to load submissions for course', course.id);
             }
         }
         
         if (!hasAssignments) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center">No pending assignments</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center">No pending assignments</td></tr>';
         }
         
     } catch (error) {
         console.error('Error loading assignments:', error);
         const tbody = document.getElementById('pendingAssignments');
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center">Failed to load assignments</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center">Failed to load assignments</td></tr>';
     }
 }
 
@@ -795,10 +1027,7 @@ async function loadCoursesForDropdown(selectId) {
         const user = getCurrentUser();
         if (!user) return;
         
-        const response = await apiCall(`/api/courses/instructor/${user.id}`);
-        if (!response.ok) return;
-        
-        const courses = await response.json();
+        const courses = await apiCall(`/api/courses/instructor/${user.id}`);
         const select = document.getElementById(selectId);
         if (!select) return;
         

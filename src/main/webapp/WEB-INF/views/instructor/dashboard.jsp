@@ -110,6 +110,7 @@
                         <table class="data-table">
                             <thead>
                                 <tr>
+                                    <th>USN</th>
                                     <th>Student</th>
                                     <th>Course</th>
                                     <th>Assignment</th>

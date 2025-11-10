@@ -177,6 +177,7 @@
             }
 
             let tableHTML = '<table class="data-table"><thead><tr>';
+            tableHTML += '<th><i class="fas fa-id-card"></i> USN</th>';
             tableHTML += '<th><i class="fas fa-user"></i> Student</th>';
             tableHTML += '<th><i class="fas fa-book"></i> Course</th>';
             tableHTML += '<th><i class="fas fa-calendar"></i> Date</th>';
@@ -187,6 +188,7 @@
             
             attendance.forEach(record => {
                 tableHTML += '<tr>';
+                tableHTML += '<td>' + (record.student?.usn || 'N/A') + '</td>';
                 tableHTML += '<td>' + (record.student?.fullName || 'N/A') + '</td>';
                 tableHTML += '<td>' + (record.courseCode || '') + ' - ' + (record.courseName || 'N/A') + '</td>';
                 tableHTML += '<td>' + formatDate(record.attendanceDate) + '</td>';
