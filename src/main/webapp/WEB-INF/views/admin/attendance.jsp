@@ -69,8 +69,16 @@
     <script src="/js/main.js"></script>
     <script src="/js/admin-dashboard.js"></script>
     <script>
+        if (checkAuth()) {
+            const user = getCurrentUser();
+            if (user.role !== 'ADMIN') {
+                alert('Access denied. Admin privileges required.');
+                window.location.href = '/';
+            }
+        }
+
         let allCourses = [];
-        let currentCourseId = null;
+        let selectedCourseId = null;
         let currentDate = new Date().toISOString().split('T')[0];
 
         document.addEventListener('DOMContentLoaded', function() {

@@ -78,5 +78,14 @@
     <script src="<c:url value='/js/main.js'/>"></script>
     <script src="<c:url value='/js/auth.js'/>"></script>
     <script src="<c:url value='/js/courses.js'/>"></script>
+    <script>
+        if (checkAuth()) {
+            const user = getCurrentUser();
+            if (user.role !== 'STUDENT') {
+                alert('Access denied. Student privileges required.');
+                window.location.href = '/';
+            }
+        }
+    </script>
 </body>
 </html>

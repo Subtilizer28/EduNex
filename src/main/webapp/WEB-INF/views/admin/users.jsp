@@ -309,19 +309,38 @@
             }
 
             try {
-                await apiCall('/api/enrollments/enroll', {
+                const response = await fetch('/api/enrollments/enroll', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    },
                     body: JSON.stringify({
                         studentId: selectedStudentId,
                         courseId: parseInt(courseId)
                     })
                 });
-                alert('Student added to course successfully');
-                closeAddToCourseModal();
+
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    alert('Student enrolled successfully');
+                    closeAddToCourseModal();
+                } else {
+                    // Handle known error responses
+                    if (response.status === 409) {
+                        alert('This student is already enrolled in the selected course');
+                    } else if (response.status === 404) {
+                        alert('Error: ' + (result.error || 'Student or course not found'));
+                    } else if (response.status === 403) {
+                        alert('Error: ' + (result.error || 'Not authorized'));
+                    } else {
+                        alert('Failed to enroll student: ' + (result.error || 'Unknown error'));
+                    }
+                }
             } catch (error) {
                 console.error('Error adding student to course:', error);
-                alert('Failed to add student to course: ' + error.message);
+                alert('Network error: Failed to communicate with server');
             }
         }
 

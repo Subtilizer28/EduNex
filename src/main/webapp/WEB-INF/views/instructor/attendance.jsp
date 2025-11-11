@@ -80,19 +80,17 @@
 
     <script src="/js/main.js"></script>
     <script>
-        let currentUser = null;
-        let currentCourse = null;
-        let enrolledStudents = [];
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const user = localStorage.getItem('user');
-            if (user) {
-                currentUser = JSON.parse(user);
-                loadInstructorCourses();
+        if (checkAuth()) {
+            const user = getCurrentUser();
+            if (user.role !== 'INSTRUCTOR' && user.role !== 'ADMIN') {
+                alert('Access denied. Instructor privileges required.');
+                window.location.href = '/';
             }
-        });
+        }
 
-        async function loadInstructorCourses() {
+        const currentUser = getCurrentUser();
+        let currentCourse = null;
+        let currentDate = null;        async function loadInstructorCourses() {
             try {
                 const courses = await apiCall('/api/courses/instructor/' + currentUser.id, 'GET');
                 const select = document.getElementById('courseSelect');

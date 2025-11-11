@@ -153,5 +153,14 @@
 
     <script src="/js/main.js"></script>
     <script src="/js/assignments.js"></script>
+    <script>
+        if (checkAuth()) {
+            const user = getCurrentUser();
+            if (user.role !== 'STUDENT') {
+                alert('Access denied. Student privileges required.');
+                window.location.href = '/';
+            }
+        }
+    </script>
 </body>
 </html>

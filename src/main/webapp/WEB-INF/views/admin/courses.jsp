@@ -277,7 +277,7 @@
                 document.getElementById('bulkEnrollForm').reset();
                 
                 // Reload courses to update enrollment counts
-                loadCourses();
+                loadAllCourses();
             })
             .catch(error => {
                 submitBtn.disabled = false;
