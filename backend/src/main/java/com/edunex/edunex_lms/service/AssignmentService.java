@@ -114,6 +114,16 @@ public class AssignmentService {
         return assignmentRepository.findAll();
     }
     
+    public List<Assignment> getInstructorAssignments(Long instructorId) {
+        // Get assignments from instructor's courses
+        List<Course> courses = courseRepository.findByInstructorId(instructorId);
+        List<Assignment> assignments = new ArrayList<>();
+        for (Course course : courses) {
+            assignments.addAll(assignmentRepository.findByCourseId(course.getId()));
+        }
+        return assignments;
+    }
+    
     public List<Assignment> getPendingAssignments(Long courseId) {
         return assignmentRepository.findByCourseId(courseId).stream()
             .filter(a -> a.getStatus() == Assignment.SubmissionStatus.PENDING ||

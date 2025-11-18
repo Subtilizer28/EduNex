@@ -170,4 +170,55 @@ public class QuizService {
     public List<QuizAttempt> getUserAttempts(Long quizId, Long userId) {
         return quizAttemptRepository.findByQuizIdAndStudentId(quizId, userId);
     }
+    
+    public List<Quiz> getInstructorQuizzes(Long instructorId) {
+        return quizRepository.findByInstructorId(instructorId);
+    }
+    
+    public List<Quiz> getStudentQuizzes(Long studentId) {
+        // Get student's enrolled courses
+        List<Enrollment> enrollments = enrollmentRepository.findByStudentId(studentId);
+        List<Long> courseIds = enrollments.stream()
+            .map(e -> e.getCourse().getId())
+            .collect(Collectors.toList());
+        
+        // Get quizzes from those courses
+        if (courseIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return quizRepository.findByCourseIdIn(courseIds);
+    }
+    
+    @Transactional
+    public Quiz updateQuiz(Long id, Quiz quizDetails) {
+        Quiz quiz = quizRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Quiz not found"));
+        
+        quiz.setTitle(quizDetails.getTitle());
+        quiz.setDescription(quizDetails.getDescription());
+        quiz.setDurationMinutes(quizDetails.getDurationMinutes());
+        quiz.setTotalMarks(quizDetails.getTotalMarks());
+        quiz.setPassingMarks(quizDetails.getPassingMarks());
+        quiz.setStartTime(quizDetails.getStartTime());
+        quiz.setEndTime(quizDetails.getEndTime());
+        quiz.setDueDate(quizDetails.getDueDate());
+        
+        return quizRepository.save(quiz);
+    }
+    
+    @Transactional
+    public void deleteQuiz(Long id) {
+        Quiz quiz = quizRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Quiz not found"));
+        
+        quizRepository.delete(quiz);
+        
+        activityLogService.logActivity(
+            "QUIZ_DELETED",
+            "Quiz deleted: " + quiz.getTitle(),
+            quiz.getCourse().getInstructor(),
+            "Quiz",
+            id
+        );
+    }
 }
