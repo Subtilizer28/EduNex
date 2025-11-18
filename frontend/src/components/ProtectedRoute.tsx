@@ -1,6 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { UserRole } from '@/types';
+import { useEffect } from 'react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -8,7 +9,14 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, isTokenValid, logout } = useAuthStore();
+
+  useEffect(() => {
+    // Check token validity on mount and when authenticated state changes
+    if (isAuthenticated && !isTokenValid()) {
+      logout();
+    }
+  }, [isAuthenticated, isTokenValid, logout]);
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
