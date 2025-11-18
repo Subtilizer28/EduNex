@@ -1,26 +1,50 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, useEffect, useCallback } from 'react';
 import { StatCard } from '@/components/StatCard';
 import { BookOpen, FileText, ClipboardList, Users } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
-
-const courseEnrollmentData = [
-  { course: 'CS101', students: 45 },
-  { course: 'CS102', students: 38 },
-  { course: 'CS201', students: 52 },
-];
+import { toast } from 'sonner';
+import { useAuthStore } from '@/store/authStore';
+import { courseAPI, assignmentAPI, quizAPI } from '@/lib/api';
+import { useNavigate } from 'react-router-dom';
 
 const InstructorDashboard = () => {
+  const { user } = useAuthStore();
+  const navigate = useNavigate();
+  const [courses, setCourses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchDashboardData = useCallback(async () => {
+    try {
+      const coursesResponse = await courseAPI.getInstructorCourses(user!.id);
+      setCourses(coursesResponse.data || []);
+    } catch (error: any) {
+      toast.error('Failed to load dashboard data', {
+        description: error.response?.data?.message || 'Unable to fetch courses',
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchDashboardData();
+    }
+  }, [user, fetchDashboardData]);
+
+  const totalStudents = courses.reduce((sum, course) => sum + (course.enrollmentCount || 0), 0);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-lg">Loading dashboard...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -31,129 +55,66 @@ const InstructorDashboard = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="My Courses"
-          value={3}
+          value={courses.length}
           icon={BookOpen}
           description="Active courses"
         />
         <StatCard
-          title="Assignments to Grade"
-          value={12}
-          icon={FileText}
-          description="Pending submissions"
-        />
-        <StatCard
-          title="Quizzes Created"
-          value={8}
-          icon={ClipboardList}
-          description="Active quizzes"
-        />
-        <StatCard
           title="Total Students"
-          value={135}
+          value={totalStudents}
           icon={Users}
           description="Across all courses"
         />
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Course Enrollment</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={courseEnrollmentData}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="course" className="text-xs" />
-                <YAxis className="text-xs" />
-                <Tooltip />
-                <Legend />
-                <Bar
-                  dataKey="students"
-                  fill="hsl(var(--primary))"
-                  name="Students"
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>My Courses</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[
-                { code: 'CS101', name: 'Introduction to Programming', students: '45/60' },
-                { code: 'CS102', name: 'Data Structures', students: '38/50' },
-                { code: 'CS201', name: 'Advanced Algorithms', students: '52/60' },
-              ].map((course, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between rounded-lg border p-4"
-                >
-                  <div>
-                    <p className="font-medium">{course.name}</p>
-                    <p className="text-sm text-muted-foreground">{course.code}</p>
-                  </div>
-                  <div className="text-right">
-                    <Badge variant="secondary">{course.students}</Badge>
-                    <p className="mt-1 text-xs text-muted-foreground">students</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard
+          title="Assignments"
+          value={0}
+          icon={FileText}
+          description="Create and grade"
+        />
+        <StatCard
+          title="Quizzes"
+          value={0}
+          icon={ClipboardList}
+          description="Active quizzes"
+        />
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Assignments to Grade</CardTitle>
+          <CardTitle>My Courses</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {[
-              {
-                course: 'CS101',
-                title: 'Assignment 1: Variables and Data Types',
-                submissions: 42,
-                graded: 30,
-              },
-              {
-                course: 'CS102',
-                title: 'Assignment 2: Linked Lists',
-                submissions: 35,
-                graded: 28,
-              },
-              {
-                course: 'CS201',
-                title: 'Assignment 3: Dynamic Programming',
-                submissions: 48,
-                graded: 40,
-              },
-            ].map((assignment, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between rounded-lg border p-4"
-              >
-                <div className="flex-1">
-                  <p className="font-medium">{assignment.title}</p>
-                  <p className="text-sm text-muted-foreground">{assignment.course}</p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <p className="text-sm font-medium">
-                      {assignment.graded}/{assignment.submissions}
-                    </p>
-                    <p className="text-xs text-muted-foreground">graded</p>
+          {courses.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">No courses assigned yet</p>
+          ) : (
+            <div className="space-y-4">
+              {courses.map((course: any) => (
+                <div
+                  key={course.id}
+                  className="flex items-center justify-between rounded-lg border p-4"
+                >
+                  <div className="flex-1">
+                    <p className="font-medium">{course.courseName}</p>
+                    <p className="text-sm text-muted-foreground">{course.courseCode}</p>
                   </div>
-                  <Button size="sm">Grade</Button>
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <Badge variant="secondary">
+                        {course.enrollmentCount || 0}/{course.maxStudents || 0}
+                      </Badge>
+                      <p className="mt-1 text-xs text-muted-foreground">students</p>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => navigate(`/instructor/courses/${course.id}`)}
+                    >
+                      View
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

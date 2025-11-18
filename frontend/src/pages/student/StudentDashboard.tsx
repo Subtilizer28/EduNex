@@ -1,11 +1,75 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, useEffect, useCallback } from 'react';
 import { StatCard } from '@/components/StatCard';
 import { BookOpen, FileText, ClipboardList, Calendar } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { toast } from 'sonner';
+import { useAuthStore } from '@/store/authStore';
+import { enrollmentAPI, assignmentAPI, attendanceAPI } from '@/lib/api';
+import { useNavigate } from 'react-router-dom';
 
 const StudentDashboard = () => {
+  const { user } = useAuthStore();
+  const navigate = useNavigate();
+  const [enrollments, setEnrollments] = useState<any[]>([]);
+  const [assignments, setAssignments] = useState<any[]>([]);
+  const [attendanceRecords, setAttendanceRecords] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchDashboardData = useCallback(async () => {
+    if (!user?.id) return;
+    
+    try {
+      const [enrollmentsRes, assignmentsRes, attendanceRes] = await Promise.all([
+        enrollmentAPI.getMyEnrollments(),
+        assignmentAPI.getStudentAssignments(user.id),
+        attendanceAPI.getMyAttendance(),
+      ]);
+
+      setEnrollments(enrollmentsRes.data || []);
+      setAssignments(assignmentsRes.data || []);
+      setAttendanceRecords(attendanceRes.data || []);
+    } catch (error: any) {
+      toast.error('Failed to load dashboard data', {
+        description: error.response?.data?.message || 'Unable to fetch data',
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchDashboardData();
+    }
+  }, [user, fetchDashboardData]);
+
+  // Calculate stats
+  const pendingAssignments = assignments.filter(
+    (a) => a.submissionStatus === 'PENDING' || !a.submissionStatus
+  ).length;
+
+  const upcomingQuizzes = 0; // Placeholder - would need quiz API
+
+  const attendancePercentage = attendanceRecords.length > 0
+    ? Math.round(
+        (attendanceRecords.filter((a) => a.status === 'PRESENT').length /
+          attendanceRecords.length) *
+          100
+      )
+    : 0;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-lg">Loading dashboard...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -16,25 +80,25 @@ const StudentDashboard = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Enrolled Courses"
-          value={5}
+          value={enrollments.length}
           icon={BookOpen}
           description="Active courses"
         />
         <StatCard
           title="Pending Assignments"
-          value={3}
+          value={pendingAssignments}
           icon={FileText}
           description="Due this week"
         />
         <StatCard
           title="Upcoming Quizzes"
-          value={2}
+          value={upcomingQuizzes}
           icon={ClipboardList}
           description="Scheduled"
         />
         <StatCard
           title="Attendance"
-          value="92%"
+          value={`${attendancePercentage}%`}
           icon={Calendar}
           description="Overall attendance"
         />
@@ -45,32 +109,38 @@ const StudentDashboard = () => {
           <CardTitle>Enrolled Courses</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {[
-              { code: 'CS101', name: 'Introduction to Programming', instructor: 'Dr. Smith', progress: 75 },
-              { code: 'CS102', name: 'Data Structures', instructor: 'Prof. Johnson', progress: 60 },
-              { code: 'MATH101', name: 'Calculus I', instructor: 'Dr. Williams', progress: 85 },
-              { code: 'ENG101', name: 'Technical Writing', instructor: 'Prof. Davis', progress: 50 },
-              { code: 'CS201', name: 'Advanced Algorithms', instructor: 'Dr. Brown', progress: 40 },
-            ].map((course, index) => (
-              <div key={index} className="rounded-lg border p-4">
-                <div className="mb-2 flex items-start justify-between">
-                  <div>
-                    <p className="font-medium">{course.name}</p>
-                    <p className="text-sm text-muted-foreground">{course.code} • {course.instructor}</p>
+          {enrollments.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">No courses enrolled yet</p>
+          ) : (
+            <div className="space-y-4">
+              {enrollments.map((enrollment: any) => (
+                <div key={enrollment.id} className="rounded-lg border p-4">
+                  <div className="mb-2 flex items-start justify-between">
+                    <div>
+                      <p className="font-medium">{enrollment.course?.courseName || 'N/A'}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {enrollment.course?.courseCode || 'N/A'} • {enrollment.course?.instructor?.fullName || 'N/A'}
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => navigate(`/student/courses/${enrollment.course?.id}`)}
+                    >
+                      View
+                    </Button>
                   </div>
-                  <Button size="sm" variant="outline">View</Button>
-                </div>
-                <div className="space-y-1">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-muted-foreground">Progress</span>
-                    <span className="font-medium">{course.progress}%</span>
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted-foreground">Progress</span>
+                      <span className="font-medium">{enrollment.progress || 0}%</span>
+                    </div>
+                    <Progress value={enrollment.progress || 0} className="h-2" />
                   </div>
-                  <Progress value={course.progress} className="h-2" />
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -80,28 +150,32 @@ const StudentDashboard = () => {
             <CardTitle>Upcoming Assignments</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {[
-                { course: 'CS101', title: 'Assignment 3', dueDate: 'Due in 2 days', status: 'pending' },
-                { course: 'CS102', title: 'Project Submission', dueDate: 'Due in 5 days', status: 'pending' },
-                { course: 'MATH101', title: 'Problem Set 4', dueDate: 'Due in 1 week', status: 'pending' },
-              ].map((assignment, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between rounded-lg border p-4"
-                >
-                  <div>
-                    <p className="font-medium">{assignment.title}</p>
-                    <p className="text-sm text-muted-foreground">{assignment.course}</p>
+            {assignments.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">No pending assignments</p>
+            ) : (
+              <div className="space-y-4">
+                {assignments.slice(0, 5).map((assignment: any) => (
+                  <div
+                    key={assignment.id}
+                    className="flex items-center justify-between rounded-lg border p-4"
+                  >
+                    <div>
+                      <p className="font-medium">{assignment.title || 'Untitled Assignment'}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {assignment.course?.courseCode || 'N/A'}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <Badge variant={assignment.submissionStatus === 'PENDING' ? 'destructive' : 'default'}>
+                        {assignment.dueDate
+                          ? new Date(assignment.dueDate).toLocaleDateString()
+                          : 'No due date'}
+                      </Badge>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <Badge variant={assignment.status === 'pending' ? 'destructive' : 'default'}>
-                      {assignment.dueDate}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -110,27 +184,36 @@ const StudentDashboard = () => {
             <CardTitle>Recent Grades</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {[
-                { course: 'CS101', assignment: 'Assignment 2', marks: '18/20', grade: 'A' },
-                { course: 'MATH101', assignment: 'Quiz 3', marks: '45/50', grade: 'A' },
-                { course: 'CS102', assignment: 'Midterm Exam', marks: '85/100', grade: 'B+' },
-              ].map((grade, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between rounded-lg border p-4"
-                >
-                  <div>
-                    <p className="font-medium">{grade.assignment}</p>
-                    <p className="text-sm text-muted-foreground">{grade.course}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-lg font-bold text-primary">{grade.grade}</p>
-                    <p className="text-xs text-muted-foreground">{grade.marks}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {assignments.filter((a: any) => a.marks !== null && a.marks !== undefined).length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">No grades available yet</p>
+            ) : (
+              <div className="space-y-4">
+                {assignments
+                  .filter((a: any) => a.marks !== null && a.marks !== undefined)
+                  .slice(0, 5)
+                  .map((assignment: any) => (
+                    <div
+                      key={assignment.id}
+                      className="flex items-center justify-between rounded-lg border p-4"
+                    >
+                      <div>
+                        <p className="font-medium">{assignment.title || 'Untitled'}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {assignment.course?.courseCode || 'N/A'}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-bold text-primary">
+                          {assignment.marks || 0}/{assignment.maxMarks || 100}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {Math.round(((assignment.marks || 0) / (assignment.maxMarks || 100)) * 100)}%
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

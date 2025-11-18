@@ -1,12 +1,11 @@
 export type UserRole = 'ADMIN' | 'INSTRUCTOR' | 'STUDENT';
 
 export interface User {
+  fullName: string;
   id: number;
   usn: string;
-  name: string;
   email: string;
   role: UserRole;
-  department?: string;
   phone?: string;
   isActive: boolean;
   createdAt: string;
