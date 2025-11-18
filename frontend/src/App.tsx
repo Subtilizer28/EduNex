@@ -24,9 +24,15 @@ import BulkOperations from './pages/admin/BulkOperations';
 import InstructorDashboard from './pages/instructor/InstructorDashboard';
 import InstructorCourses from './pages/instructor/InstructorCourses';
 import InstructorAssignments from './pages/instructor/InstructorAssignments';
+import InstructorQuizzes from './pages/instructor/InstructorQuizzes';
+import InstructorAttendance from './pages/instructor/InstructorAttendance';
+import InstructorCourseMaterials from './pages/instructor/InstructorCourseMaterials';
 import StudentDashboard from './pages/student/StudentDashboard';
 import StudentCourses from './pages/student/StudentCourses';
 import StudentAssignments from './pages/student/StudentAssignments';
+import StudentQuizzes from './pages/student/StudentQuizzes';
+import StudentQuizAttempt from './pages/student/StudentQuizAttempt';
+import StudentAttendance from './pages/student/StudentAttendance';
 
 const queryClient = new QueryClient();
 
@@ -103,6 +109,9 @@ const App = () => {
               <Route path="dashboard" element={<InstructorDashboard />} />
               <Route path="courses" element={<InstructorCourses />} />
               <Route path="assignments" element={<InstructorAssignments />} />
+              <Route path="quizzes" element={<InstructorQuizzes />} />
+              <Route path="attendance" element={<InstructorAttendance />} />
+              <Route path="materials" element={<InstructorCourseMaterials />} />
             </Route>
 
             {/* Student Routes */}
@@ -117,6 +126,9 @@ const App = () => {
               <Route path="dashboard" element={<StudentDashboard />} />
               <Route path="courses" element={<StudentCourses />} />
               <Route path="assignments" element={<StudentAssignments />} />
+              <Route path="quizzes" element={<StudentQuizzes />} />
+              <Route path="quizzes/:quizId/attempt" element={<StudentQuizAttempt />} />
+              <Route path="attendance" element={<StudentAttendance />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

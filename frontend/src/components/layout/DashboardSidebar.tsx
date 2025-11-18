@@ -152,13 +152,6 @@ const menuItems: MenuItem[] = [
     section: 'Resources',
   },
   {
-    title: 'Student Reports',
-    url: '/instructor/student-reports',
-    icon: FileBarChart,
-    roles: ['INSTRUCTOR'],
-    section: 'Resources',
-  },
-  {
     title: 'Messages',
     url: '/instructor/messages',
     icon: MessageSquare,
@@ -211,13 +204,6 @@ const menuItems: MenuItem[] = [
     section: 'Academic',
   },
   // Student - Resources
-  {
-    title: 'Course Materials',
-    url: '/student/materials',
-    icon: BookMarked,
-    roles: ['STUDENT'],
-    section: 'Resources',
-  },
   {
     title: 'Messages',
     url: '/student/messages',
