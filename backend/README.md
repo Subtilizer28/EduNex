@@ -1,605 +1,577 @@
-# EduNex - Learning Management System
+# 🔧 EduNex Backend - Spring Boot API
 
-![EduNex Logo](https://img.shields.io/badge/EduNex-LMS-blue)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.6-green)
-![Java](https://img.shields.io/badge/Java-21-orange)
-![License](https://img.shields.io/badge/License-MIT-yellow)
+This is the backend REST API for the EduNex Learning Management System, built with **Spring Boot 3.5.6** and **Java 17+**.
 
-## 📚 Project Overview
+---
 
-**EduNex** is a modern, feature-rich Learning Management System (LMS) built with Java Spring Boot. It provides comprehensive educational management capabilities with a sleek dark-mode interface and role-based access control.
+## 📋 Table of Contents
 
-### Core Features
+- [Overview](#overview)
+- [Technologies](#technologies)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [Configuration](#configuration)
+- [Database Schema](#database-schema)
+- [API Endpoints](#api-endpoints)
+- [Security](#security)
+- [Testing](#testing)
+- [Deployment](#deployment)
 
-#### 🔐 Authentication & Authorization
-- JWT-based authentication with secure token management
+---
+
+## 🌟 Overview
+
+The EduNex backend provides a comprehensive RESTful API for managing:
+- User authentication and authorization (JWT)
+- Course management
+- Assignment submission and grading
+- Attendance tracking
+- Student enrollment
+- Course materials
 - Role-based access control (Admin, Instructor, Student)
-- BCrypt password encryption
-- Session management with localStorage
-
-#### 👨‍💼 Admin Features
-- **User Management**: Create, activate, deactivate, and delete users
-- **Course Oversight**: View all courses and system-wide statistics
-- **Instructor Assignment**: Assign instructors to courses
-- **Attendance Oversight**: View all attendance records with filtering by course and date
-- **System Activity Logs**: Real-time tracking of system events (user registration, course creation, quiz/assignment activities)
-- **Dashboard Analytics**: User statistics, course metrics, enrollment tracking
-- **Recent Users**: View last 10 newly registered users
-
-#### 👨‍🏫 Instructor Features
-- **Course Management**: Create and manage courses with table view
-- **Assignment Creation**: Create assignments with modals, set due dates and points
-- **Quiz Management**: Create quizzes with dynamic question builder (multiple questions with multiple choice options)
-- **Student Enrollment**: Enroll students in courses
-- **Attendance Management**: Mark student attendance for courses with status (Present, Absent, Late, Excused)
-- **Grading System**: Grade student assignments and quiz attempts
-- **Dashboard Analytics**: Course statistics, student performance, pending grading count
-- **Scrollable Modals**: All creation modals are scrollable with background lock
-
-#### 🎓 Student Features
-- **Course Enrollment**: View enrolled courses
-- **Assignment Submission**: Submit assignments with file support
-- **Timed Quizzes**: Take quizzes with automatic timer and submission
-- **Grade Viewing**: Track grades and academic progress
-- **Attendance Viewing**: View attendance records per course with attendance rate
-- **Dashboard**: Personalized student dashboard with course overview and attendance statistics
-
-#### 🎨 UI/UX Features
-- **Dark Mode Interface**: Modern dark theme with accent colors
-- **Responsive Design**: Mobile-friendly layout
-- **Scrollable Modals**: Long forms scroll within modals, background scroll disabled
-- **Empty State Handling**: User-friendly messages when no data exists
-- **Table Views**: Organized data display for courses, assignments, and quizzes
-- **Real-time Updates**: Dynamic content loading with fetch API
-- **Toast Notifications**: User feedback for actions
 
 ---
 
-## 🛠️ Technologies Used
+## 🛠 Technologies
 
-### Backend
-- **Java 21**
-- **Spring Boot 3.5.6**
-  - Spring Web
-  - Spring Security (JWT Authentication)
-  - Spring Data JPA (Hibernate)
-- **MySQL 8.0+** (Database)
-- **Maven** (Build tool)
-- **Lombok** (Boilerplate reduction)
-
-### Frontend
-- **JSP** (Java Server Pages)
-- **HTML5 & CSS3** (Dark Mode Design)
-- **Vanilla JavaScript** (ES6+)
-- **Font Awesome 6.4.0** (Icons)
-- **Chart.js** (Dashboard charts)
-
----
-
-## 📋 Prerequisites
-
-Before running the application, ensure you have:
-
-- **Java 21 or higher** installed
-- **MySQL 8.0+** installed and running
-- **Maven 3.6+** installed
-- **IDE** (IntelliJ IDEA, Eclipse, or VS Code recommended)
-
----
-
-## 🚀 Installation & Setup
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/ashtonmths/EduNex.git
-cd EduNex
-```
-
-### 2. Configure MySQL Database
-
-Create a MySQL database:
-
-```sql
-CREATE DATABASE edunex_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'edunex'@'localhost' IDENTIFIED BY 'your_password';
-GRANT ALL PRIVILEGES ON edunex_db.* TO 'edunex'@'localhost';
-FLUSH PRIVILEGES;
-```
-
-### 3. Configure Application Properties
-
-Update `src/main/resources/application.properties`:
-
-```properties
-# Database Configuration
-spring.datasource.url=jdbc:mysql://localhost:3306/edunex_db?useSSL=false&serverTimezone=UTC
-spring.datasource.username=edunex
-spring.datasource.password=your_password
-
-# JPA/Hibernate
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=false
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
-
-# JWT Configuration
-jwt.secret=YourSecretKeyForJWTTokenGenerationMustBeLongEnoughForHS512Algorithm
-jwt.expiration=86400000
-
-# Server Configuration
-server.port=8080
-
-# File Upload
-spring.servlet.multipart.max-file-size=10MB
-spring.servlet.multipart.max-request-size=10MB
-```
-
-### 4. Build and Run
-
-#### Using Maven:
-
-```bash
-# Build the project
-mvn clean package -DskipTests
-
-# Run the application
-mvn spring-boot:run
-```
-
-#### Using IDE:
-- Open the project in your IDE
-- Run `EduNexApplication.java` main method
-
-### 5. Access the Application
-
-Open your browser and navigate to:
-- **Homepage**: http://localhost:8080/
-- **Login**: http://localhost:8080/login
-
-**Note**: Create an admin account on first login through the registration form, then create other users from the admin panel.
-
----
-
-## 👥 User Roles & Capabilities
-
-### 🔴 Admin Role
-**Full System Access**
-- Create/manage all users (Admin, Instructor, Student)
-- View system-wide statistics and analytics
-- Access activity logs (recent system events)
-- Assign instructors to courses
-- Activate/deactivate user accounts
-- Delete users
-- View all courses across the system
-- Monitor user registrations and enrollments
-
-### 🟡 Instructor Role
-**Course & Content Management**
-- Create and manage own courses
-- Create assignments with customizable points and due dates
-- Create quizzes with dynamic question builder
-- Enroll students in their courses
-- Mark student attendance
-- Grade assignments and quiz attempts
-- View course analytics and pending grading count
-- Access instructor dashboard with charts
-
-### 🟢 Student Role
-**Learning & Progress Tracking**
-- View enrolled courses
-- Submit assignments
-- Take timed quizzes
-- View grades and feedback
-- Check attendance records
-- Track academic progress
-- Access personalized dashboard
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| **Java** | 17+ | Programming language |
+| **Spring Boot** | 3.5.6 | Application framework |
+| **Spring Security** | 6.x | Authentication & authorization |
+| **Spring Data JPA** | 3.x | Data persistence |
+| **Hibernate** | 6.6.29 | ORM framework |
+| **MySQL** | 8.0+ | Database |
+| **JWT** | 0.11.5 | JSON Web Tokens |
+| **Lombok** | 1.18.34 | Code generation |
+| **Maven** | 3.6+ | Build tool |
+| **Validation API** | 3.0.2 | Input validation |
 
 ---
 
 ## 📁 Project Structure
 
 ```
-EduNex/
+backend/
 ├── src/
 │   ├── main/
 │   │   ├── java/com/edunex/edunex_lms/
-│   │   │   ├── config/
-│   │   │   │   ├── SecurityConfig.java         # Spring Security & JWT config
-│   │   │   │   └── WebMvcConfig.java           # MVC configuration
-│   │   │   ├── controller/
-│   │   │   │   ├── AdminController.java        # Admin endpoints
-│   │   │   │   ├── AssignmentController.java   # Assignment CRUD
-│   │   │   │   ├── AttendanceController.java   # Attendance marking
-│   │   │   │   ├── AuthController.java         # Login/Register
-│   │   │   │   ├── CourseController.java       # Course management
-│   │   │   │   ├── EnrollmentController.java   # Enrollment handling
-│   │   │   │   ├── QuizController.java         # Quiz & attempts
-│   │   │   │   └── ViewController.java         # JSP page routing
-│   │   │   ├── dto/
-│   │   │   │   ├── LoginRequest.java
-│   │   │   │   ├── LoginResponse.java
-│   │   │   │   └── UserRegistrationDTO.java
-│   │   │   ├── entity/
-│   │   │   │   ├── ActivityLog.java            # System activity tracking
-│   │   │   │   ├── Assignment.java
-│   │   │   │   ├── Attendance.java
-│   │   │   │   ├── Course.java
-│   │   │   │   ├── Enrollment.java
-│   │   │   │   ├── Question.java               # Quiz questions
-│   │   │   │   ├── Quiz.java
-│   │   │   │   ├── QuizAttempt.java           # Student quiz attempts
-│   │   │   │   └── User.java
-│   │   │   ├── repository/
-│   │   │   │   ├── ActivityLogRepository.java
-│   │   │   │   ├── AssignmentRepository.java
-│   │   │   │   ├── AttendanceRepository.java
+│   │   │   ├── config/              # Configuration classes
+│   │   │   │   ├── DataSeeder.java         # Database seeding
+│   │   │   │   ├── SecurityConfig.java     # Security configuration
+│   │   │   │   └── CorsConfig.java         # CORS settings
+│   │   │   │
+│   │   │   ├── controller/          # REST controllers
+│   │   │   │   ├── AuthController.java     # Authentication endpoints
+│   │   │   │   ├── CourseController.java   # Course management
+│   │   │   │   ├── AssignmentController.java
+│   │   │   │   ├── AttendanceController.java
+│   │   │   │   ├── AdminController.java
+│   │   │   │   └── MaterialController.java
+│   │   │   │
+│   │   │   ├── entity/              # JPA entities
+│   │   │   │   ├── User.java              # User entity
+│   │   │   │   ├── Course.java            # Course entity
+│   │   │   │   ├── Enrollment.java        # Enrollment entity
+│   │   │   │   ├── Assignment.java        # Assignment entity
+│   │   │   │   ├── Attendance.java        # Attendance entity
+│   │   │   │   └── CourseMaterial.java    # Course materials
+│   │   │   │
+│   │   │   ├── repository/          # Data access layer
+│   │   │   │   ├── UserRepository.java
 │   │   │   │   ├── CourseRepository.java
 │   │   │   │   ├── EnrollmentRepository.java
-│   │   │   │   ├── QuestionRepository.java
-│   │   │   │   ├── QuizAttemptRepository.java
-│   │   │   │   ├── QuizRepository.java
-│   │   │   │   └── UserRepository.java
-│   │   │   ├── security/
-│   │   │   │   ├── AuthEntryPointJwt.java      # JWT error handling
-│   │   │   │   ├── AuthTokenFilter.java        # JWT token filter
-│   │   │   │   ├── JwtUtils.java               # JWT generation/validation
-│   │   │   │   ├── UserDetailsImpl.java
-│   │   │   │   └── UserDetailsServiceImpl.java
-│   │   │   ├── service/
-│   │   │   │   ├── ActivityLogService.java     # Activity logging
-│   │   │   │   ├── AssignmentService.java
+│   │   │   │   ├── AssignmentRepository.java
+│   │   │   │   ├── AttendanceRepository.java
+│   │   │   │   └── MaterialRepository.java
+│   │   │   │
+│   │   │   ├── service/             # Business logic
+│   │   │   │   ├── AuthService.java
 │   │   │   │   ├── CourseService.java
-│   │   │   │   ├── EnrollmentService.java
-│   │   │   │   ├── QuizService.java
-│   │   │   │   └── UserService.java
-│   │   │   └── EduNexApplication.java          # Main application
-│   │   ├── resources/
-│   │   │   ├── application.properties
-│   │   │   ├── static/
-│   │   │   │   ├── css/
-│   │   │   │   │   └── style.css               # Global dark theme styles
-│   │   │   │   └── js/
-│   │   │   │       ├── admin-dashboard.js      # Admin dashboard logic
-│   │   │   │       ├── assignments.js
-│   │   │   │       ├── auth.js                 # Login/Register/Logout
-│   │   │   │       ├── courses.js
-│   │   │   │       ├── instructor.js           # Combined instructor JS
-│   │   │   │       ├── main.js                 # API calls, utilities
-│   │   │   │       ├── profile.js
-│   │   │   │       ├── quizzes.js
-│   │   │   │       ├── student-dashboard.js
-│   │   │   │       └── theme.js
-│   │   │   └── META-INF/
-│   │   │       └── additional-spring-configuration-metadata.json
-│   │   └── webapp/
-│   │       └── WEB-INF/
-│   │           └── views/
-│   │               ├── admin/
-│   │               │   ├── courses.jsp
-│   │               │   ├── dashboard.jsp
-│   │               │   └── users.jsp
-│   │               ├── instructor/
-│   │               │   ├── assignments.jsp     # Table view
-│   │               │   ├── courses.jsp         # Table view
-│   │               │   ├── dashboard.jsp       # Charts & stats
-│   │               │   └── quizzes.jsp         # Table view
-│   │               ├── student/
-│   │               │   └── dashboard.jsp
-│   │               ├── assignments.jsp
-│   │               ├── courses.jsp
-│   │               ├── index.jsp
-│   │               ├── login.jsp
-│   │               ├── profile.jsp
-│   │               └── quizzes.jsp
-│   └── test/
+│   │   │   │   ├── UserService.java
+│   │   │   │   └── JwtService.java
+│   │   │   │
+│   │   │   ├── dto/                 # Data Transfer Objects
+│   │   │   │   ├── LoginRequest.java
+│   │   │   │   ├── RegisterRequest.java
+│   │   │   │   └── AuthResponse.java
+│   │   │   │
+│   │   │   ├── exception/           # Exception handling
+│   │   │   │   └── GlobalExceptionHandler.java
+│   │   │   │
+│   │   │   └── EduNexApplication.java  # Main application class
+│   │   │
+│   │   └── resources/
+│   │       ├── application.properties    # Configuration
+│   │       └── application-prod.properties
+│   │
+│   └── test/                        # Unit and integration tests
 │       └── java/com/edunex/edunex_lms/
-│           └── EduNexLmsApplicationTests.java
-├── pom.xml
-├── QUICKSTART.md
-├── README.md
-└── sample-data.sql
+│
+├── target/                          # Build output
+├── pom.xml                          # Maven dependencies
+├── mvnw                             # Maven wrapper (Unix)
+├── mvnw.cmd                         # Maven wrapper (Windows)
+└── README.md                        # This file
 ```
 
 ---
 
-## 🔐 API Endpoints
+## 🚀 Getting Started
 
-### Authentication
-```
-POST   /api/auth/login              # User login (returns JWT token)
-POST   /api/auth/register           # User registration (Admin only)
-```
+### Prerequisites
 
-### Admin APIs
-```
-GET    /api/admin/users                    # Get all users
-GET    /api/admin/users/role/{role}        # Get users by role
-POST   /api/admin/users                    # Create new user
-PUT    /api/admin/users/{id}/activate      # Activate user account
-PUT    /api/admin/users/{id}/deactivate    # Deactivate user account
-DELETE /api/admin/users/{id}               # Delete user
-GET    /api/admin/stats                    # Get system statistics
-GET    /api/admin/courses                  # Get all courses
-GET    /api/admin/activities               # Get recent activity logs
-POST   /api/admin/enrollments/instructor   # Assign instructor to course
-```
+- Java Development Kit (JDK) 17 or higher
+- Maven 3.6+ or use included Maven Wrapper
+- MySQL 8.0+
+- IDE (IntelliJ IDEA, Eclipse, or VS Code)
 
-### Course APIs
-```
-GET    /api/courses                        # Get all courses
-GET    /api/courses/{id}                   # Get course by ID
-GET    /api/courses/instructor/{id}        # Get courses by instructor
-POST   /api/courses                        # Create course (Instructor/Admin)
-PUT    /api/courses/{id}                   # Update course
-DELETE /api/courses/{id}                   # Delete course
-```
+### Installation Steps
 
-### Assignment APIs
-```
-GET    /api/assignments/{id}               # Get assignment by ID
-GET    /api/assignments/course/{id}        # Get assignments by course
-POST   /api/assignments                    # Create assignment (Instructor)
-POST   /api/assignments/{id}/submit        # Submit assignment (Student)
-POST   /api/assignments/{id}/grade         # Grade assignment (Instructor)
-GET    /api/assignments/course/{id}/pending # Get pending assignments
+#### 1. Database Setup
+
+```sql
+-- Login to MySQL
+mysql -u root -p
+
+-- Create database
+CREATE DATABASE edunex_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- Create user
+CREATE USER 'edunex'@'localhost' IDENTIFIED BY 'your_secure_password';
+
+-- Grant privileges
+GRANT ALL PRIVILEGES ON edunex_db.* TO 'edunex'@'localhost';
+FLUSH PRIVILEGES;
+
+-- Verify
+SHOW DATABASES;
+EXIT;
 ```
 
-### Quiz APIs
-```
-GET    /api/quizzes/{id}                   # Get quiz by ID
-GET    /api/quizzes/course/{id}            # Get quizzes by course
-POST   /api/quizzes                        # Create quiz (Instructor)
-POST   /api/quizzes/{id}/questions         # Add questions to quiz
-POST   /api/quizzes/{id}/start             # Start quiz attempt (Student)
-POST   /api/quizzes/attempts/{id}/submit   # Submit quiz attempt
-POST   /api/quizzes/attempts/{id}/grade    # Grade quiz attempt (Instructor)
-GET    /api/quizzes/course/{id}/available  # Get available quizzes
-GET    /api/quizzes/{id}/attempts          # Get quiz attempts
+#### 2. Configure Application
+
+Edit `src/main/resources/application.properties`:
+
+```properties
+# Database credentials
+spring.datasource.username=edunex
+spring.datasource.password=your_secure_password
+
+# JWT secret (generate a secure random string)
+jwt.secret=your-256-bit-secret-key-here
+jwt.expiration=86400000
 ```
 
-### Enrollment APIs
-```
-GET    /api/enrollments/student/{id}       # Get student enrollments
-GET    /api/enrollments/course/{id}        # Get course enrollments
-POST   /api/enrollments                    # Enroll student (Instructor)
+#### 3. Build the Project
+
+```bash
+# Using Maven Wrapper (recommended)
+./mvnw clean install
+
+# Or using installed Maven
+mvn clean install
+
+# Skip tests if needed
+./mvnw clean install -DskipTests
 ```
 
-### Attendance APIs
+#### 4. Run the Application
+
+```bash
+# Using Maven Wrapper
+./mvnw spring-boot:run
+
+# Or using Maven
+mvn spring-boot:run
+
+# With specific profile
+./mvnw spring-boot:run -Dspring-boot.run.profiles=prod
 ```
-GET    /api/attendance/student/{id}                  # Get attendance by student
-GET    /api/attendance/course/{id}                   # Get attendance by course
-GET    /api/attendance/student/{studentId}/course/{courseId}  # Get attendance by student and course
-GET    /api/attendance/student/{studentId}/course/{courseId}/rate  # Get attendance rate
-GET    /api/attendance/my-attendance                 # Get current student's attendance (Student)
-GET    /api/attendance/course/{courseId}/date/{date} # Get attendance by date
-POST   /api/attendance/mark                          # Mark single attendance (Instructor/Admin)
-POST   /api/attendance/mark-multiple                 # Mark multiple attendance (Instructor/Admin)
+
+The server will start on `http://localhost:8080`
+
+#### 5. Verify Installation
+
+```bash
+# Check health
+curl http://localhost:8080/actuator/health
+
+# Should return: {"status":"UP"}
 ```
 
 ---
 
-## 📊 Database Schema
+## ⚙️ Configuration
 
-The application uses JPA/Hibernate with auto-DDL enabled (`spring.jpa.hibernate.ddl-auto=update`). Tables are created/updated automatically.
+### application.properties
 
-### Core Tables:
+```properties
+# Application Name
+spring.application.name=EduNex
+
+# Server Configuration
+server.port=8080
+server.servlet.context-path=/
+
+# Database Configuration
+spring.datasource.url=jdbc:mysql://localhost:3306/edunex_db?createDatabaseIfNotExist=true
+spring.datasource.username=edunex
+spring.datasource.password=your_password
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+# JPA/Hibernate Configuration
+spring.jpa.hibernate.ddl-auto=update        # Use 'create-drop' for fresh database
+spring.jpa.show-sql=false                   # Set to 'true' for SQL logging
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.open-in-view=false
+
+# File Upload Configuration
+spring.servlet.multipart.enabled=true
+spring.servlet.multipart.max-file-size=50MB
+spring.servlet.multipart.max-request-size=50MB
+
+# JWT Configuration
+jwt.secret=your-secret-key-at-least-256-bits
+jwt.expiration=86400000                     # 24 hours in milliseconds
+
+# Logging Configuration
+logging.level.root=INFO
+logging.level.com.edunex=DEBUG
+logging.pattern.console=%d{yyyy-MM-dd HH:mm:ss} - %msg%n
+
+# Actuator Configuration
+management.endpoints.web.exposure.include=health,info
+management.endpoint.health.show-details=when-authorized
+```
+
+### Environment Variables
+
+You can also use environment variables:
+
+```bash
+export SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/edunex_db
+export SPRING_DATASOURCE_USERNAME=edunex
+export SPRING_DATASOURCE_PASSWORD=your_password
+export JWT_SECRET=your-secret-key
+```
+
+---
+
+## 🗄️ Database Schema
+
+### Entity Relationships
+
+```
+User (1) ──< Enrollment >── (∞) Course (∞) ──> (1) Instructor
+  │                              │
+  │                              │
+  └──< Assignment >──────────────┘
+  │
+  └──< Attendance >───────────────┘
+```
+
+### Main Tables
 
 #### users
-- `id` (BIGINT, PK)
-- `username` (VARCHAR, UNIQUE)
-- `password` (VARCHAR, BCrypt hashed)
-- `email` (VARCHAR, UNIQUE)
-- `full_name` (VARCHAR)
-- `role` (ENUM: ADMIN, INSTRUCTOR, STUDENT)
-- `enabled` (BOOLEAN)
-- `account_non_locked` (BOOLEAN)
-- `created_at` (TIMESTAMP)
-- `updated_at` (TIMESTAMP)
+- `id` (PK)
+- `username` (unique)
+- `email` (unique)
+- `password` (encrypted)
+- `full_name`
+- `usn` (University Seat Number for students)
+- `role` (ADMIN, INSTRUCTOR, STUDENT)
+- `enabled`
+- `created_at`, `updated_at`
 
 #### courses
-- `id` (BIGINT, PK)
-- `course_name` (VARCHAR)
-- `course_code` (VARCHAR, UNIQUE)
-- `description` (TEXT)
-- `credits` (INT)
-- `max_students` (INT)
-- `start_date` (DATE)
-- `end_date` (DATE)
-- `instructor_id` (BIGINT, FK → users)
-- `created_at` (TIMESTAMP)
+- `id` (PK)
+- `course_code` (unique)
+- `course_name`
+- `description`
+- `category`
+- `credits`
+- `max_students`
+- `instructor_id` (FK → users)
+- `is_active`
+- `created_at`, `updated_at`
 
 #### enrollments
-- `id` (BIGINT, PK)
-- `student_id` (BIGINT, FK → users)
-- `course_id` (BIGINT, FK → courses)
-- `enrollment_date` (TIMESTAMP)
-- `status` (VARCHAR)
+- `id` (PK)
+- `student_id` (FK → users)
+- `course_id` (FK → courses)
+- `status` (ACTIVE, COMPLETED, DROPPED)
+- `progress_percentage`
+- `final_grade`
+- `enrolled_at`
 
 #### assignments
-- `id` (BIGINT, PK)
-- `title` (VARCHAR)
-- `description` (TEXT)
-- `course_id` (BIGINT, FK → courses)
-- `due_date` (TIMESTAMP)
-- `max_points` (INT)
-- `created_at` (TIMESTAMP)
-
-#### quizzes
-- `id` (BIGINT, PK)
-- `title` (VARCHAR)
-- `description` (TEXT)
-- `course_id` (BIGINT, FK → courses)
-- `duration` (INT, minutes)
-- `total_points` (INT)
-- `created_at` (TIMESTAMP)
-
-#### questions
-- `id` (BIGINT, PK)
-- `quiz_id` (BIGINT, FK → quizzes)
-- `question_text` (TEXT)
-- `option_a` (VARCHAR)
-- `option_b` (VARCHAR)
-- `option_c` (VARCHAR)
-- `option_d` (VARCHAR)
-- `correct_answer` (VARCHAR)
-- `points` (INT)
-
-#### quiz_attempts
-- `id` (BIGINT, PK)
-- `quiz_id` (BIGINT, FK → quizzes)
-- `student_id` (BIGINT, FK → users)
-- `start_time` (TIMESTAMP)
-- `end_time` (TIMESTAMP)
-- `score` (INT)
-- `status` (VARCHAR: IN_PROGRESS, SUBMITTED, GRADED)
+- `id` (PK)
+- `course_id` (FK → courses)
+- `student_id` (FK → users, nullable)
+- `title`
+- `description`
+- `due_date`
+- `max_marks`
+- `marks_obtained`
+- `submission_url`
+- `submitted_at`
+- `feedback`
+- `status` (PENDING, SUBMITTED, GRADED, LATE_SUBMISSION)
+- `created_at`, `updated_at`
 
 #### attendance
-- `id` (BIGINT, PK)
-- `student_id` (BIGINT, FK → users)
-- `course_id` (BIGINT, FK → courses)
-- `attendance_date` (DATE)
-- `status` (ENUM: PRESENT, ABSENT, LATE, EXCUSED)
-- `remarks` (VARCHAR, optional)
-- `marked_by` (BIGINT, FK → users, optional)
-- `marked_at` (TIMESTAMP)
-- UNIQUE constraint on (student_id, course_id, attendance_date)
+- `id` (PK)
+- `student_id` (FK → users)
+- `course_id` (FK → courses)
+- `attendance_date`
+- `status` (PRESENT, ABSENT, LATE)
+- `created_at`
 
-#### activity_logs
-- `id` (BIGINT, PK)
-- `activity_type` (VARCHAR: USER_REGISTRATION, ASSIGNMENT_CREATED, QUIZ_CREATED, etc.)
-- `description` (TEXT)
-- `user_id` (BIGINT, FK → users)
-- `entity_type` (VARCHAR)
-- `entity_id` (BIGINT)
-- `created_at` (TIMESTAMP)
+#### course_materials
+- `id` (PK)
+- `course_id` (FK → courses)
+- `title`
+- `description`
+- `material_type` (PDF, VIDEO, LINK, DOCUMENT)
+- `file_url`
+- `uploaded_at`
+
+---
+
+## 📡 API Endpoints
+
+### Base URL: `http://localhost:8080/api`
+
+### Authentication (Public)
+
+| Method | Endpoint | Description | Request Body |
+|--------|----------|-------------|--------------|
+| POST | `/auth/register` | Register new user | `{username, email, password, fullName, role}` |
+| POST | `/auth/login` | Login user | `{username, password}` |
+| GET | `/auth/profile` | Get current user | - |
+
+### Courses
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/courses` | Get all active courses | Yes |
+| GET | `/courses/{id}` | Get course by ID | Yes |
+| GET | `/courses/instructor/{instructorId}` | Get instructor's courses | Yes (Instructor) |
+| POST | `/courses` | Create new course | Yes (Admin/Instructor) |
+| PUT | `/courses/{id}` | Update course | Yes (Admin/Instructor) |
+| DELETE | `/courses/{id}` | Delete course | Yes (Admin) |
+| POST | `/courses/{courseId}/enroll` | Enroll in course | Yes (Student) |
+
+### Assignments
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/assignments/course/{courseId}` | Get course assignments | Yes |
+| GET | `/assignments/student/{studentId}` | Get student assignments | Yes (Student) |
+| GET | `/assignments/{id}` | Get assignment by ID | Yes |
+| POST | `/assignments` | Create assignment | Yes (Instructor) |
+| PUT | `/assignments/{id}` | Update assignment | Yes (Instructor) |
+| DELETE | `/assignments/{id}` | Delete assignment | Yes (Instructor) |
+| POST | `/assignments/{id}/submit` | Submit assignment | Yes (Student) |
+| PUT | `/assignments/{id}/grade` | Grade assignment | Yes (Instructor) |
+
+### Attendance
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/attendance/course/{courseId}` | Get course attendance | Yes |
+| GET | `/attendance/student/{studentId}` | Get student attendance | Yes (Student) |
+| GET | `/attendance/student/{studentId}/course/{courseId}` | Get student course attendance | Yes |
+| POST | `/attendance` | Mark attendance | Yes (Instructor) |
+| PUT | `/attendance/{id}` | Update attendance | Yes (Instructor) |
+
+### Course Materials
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/materials/course/{courseId}` | Get course materials | Yes |
+| POST | `/materials` | Upload material | Yes (Instructor) |
+| DELETE | `/materials/{id}` | Delete material | Yes (Instructor) |
+
+### Admin
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/admin/stats` | Get system statistics | Yes (Admin) |
+| GET | `/admin/users` | Get all users | Yes (Admin) |
+| POST | `/admin/users` | Create user | Yes (Admin) |
+| PUT | `/admin/users/{id}` | Update user | Yes (Admin) |
+| DELETE | `/admin/users/{id}` | Delete user | Yes (Admin) |
+
+### Request/Response Examples
+
+#### POST /api/auth/login
+
+**Request:**
+```json
+{
+  "username": "NNM23CS001",
+  "password": "password123"
+}
+```
+
+**Response:**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "type": "Bearer",
+  "id": 1,
+  "username": "NNM23CS001",
+  "email": "alice@student.edu",
+  "fullName": "Alice Johnson",
+  "role": "STUDENT"
+}
+```
+
+#### POST /api/courses
+
+**Request:**
+```json
+{
+  "courseCode": "CS101",
+  "courseName": "Introduction to Programming",
+  "description": "Learn programming fundamentals",
+  "category": "Programming",
+  "credits": 4,
+  "maxStudents": 50
+}
+```
+
+**Response:**
+```json
+{
+  "id": 1,
+  "courseCode": "CS101",
+  "courseName": "Introduction to Programming",
+  "description": "Learn programming fundamentals",
+  "category": "Programming",
+  "credits": 4,
+  "maxStudents": 50,
+  "instructor": {
+    "id": 2,
+    "fullName": "Dr. John Doe"
+  },
+  "isActive": true,
+  "createdAt": "2025-11-19T00:00:00"
+}
+```
+
+---
+
+## 🔐 Security
+
+### Authentication Flow
+
+1. User sends credentials to `/api/auth/login`
+2. Server validates credentials
+3. Server generates JWT token
+4. Client stores token and includes it in subsequent requests
+5. Server validates token for protected endpoints
+
+### JWT Token Structure
+
+```
+Header: {
+  "alg": "HS256",
+  "typ": "JWT"
+}
+
+Payload: {
+  "sub": "username",
+  "role": "STUDENT",
+  "iat": 1700000000,
+  "exp": 1700086400
+}
+```
+
+### Using JWT in Requests
+
+```bash
+curl -H "Authorization: Bearer <your-jwt-token>" \
+  http://localhost:8080/api/courses
+```
+
+### Role-Based Access Control
+
+| Role | Permissions |
+|------|-------------|
+| **ADMIN** | Full system access, user management |
+| **INSTRUCTOR** | Manage own courses, assignments, attendance |
+| **STUDENT** | View courses, submit assignments, view grades |
 
 ---
 
 ## 🧪 Testing
 
-Run tests using Maven:
+### Run All Tests
 
 ```bash
-# Run all tests
-mvn test
-
-# Run tests with coverage
-mvn test jacoco:report
-
-# Skip tests during build
-mvn clean package -DskipTests
+./mvnw test
 ```
+
+### Run Specific Test Class
+
+```bash
+./mvnw test -Dtest=AuthControllerTest
+```
+
+### Run with Coverage
+
+```bash
+./mvnw clean test jacoco:report
+```
+
+Coverage report will be at: `target/site/jacoco/index.html`
 
 ---
 
-## 🎨 UI/UX Design
+## 🚀 Deployment
 
-### Dark Mode Theme
-- **Background**: Pure dark (#0f0f0f)
-- **Cards**: Dark gray (#1a1a1a)
-- **Primary**: Blue (#4a90e2)
-- **Accent**: Cyan (#00d4ff)
-- **Text**: Light gray (#e0e0e0)
+### Production Configuration
 
-### Key UI Components
+Create `application-prod.properties`:
 
-#### Modal System
-- **Scrollable Content**: Modals have `max-height: calc(100vh - 6rem)` with `overflow-y: auto`
-- **Background Lock**: `body` scroll disabled when modal open (`overflow: hidden`)
-- **Click Outside**: Close modal by clicking overlay
-- **Responsive**: Adapts to mobile screens
-
-#### Empty States
-- **Courses**: "No courses yet. Create your first course!"
-- **Assignments**: "No assignments yet. Create your first assignment!"
-- **Quizzes**: "No quizzes yet. Create your first quiz!"
-- **Center Aligned**: Friendly messaging encouraging content creation
-
-#### Table Views
-All data displayed in responsive tables with:
-- Sortable columns
-- Action buttons (View, Edit, Grade)
-- Status badges (Active, Completed, Upcoming)
-- Pagination (when implemented)
-
-#### Forms
-- Inline validation
-- Clear error messages
-- Loading states during submission
-- Success/error toast notifications
-
----
-
-## 🔧 Configuration
-
-### JWT Settings
 ```properties
-# JWT Secret (must be long for HS512)
-jwt.secret=YourVeryLongSecretKeyForJWTTokenGeneration
-
-# Token expiration (milliseconds) - Default: 24 hours
-jwt.expiration=86400000
+spring.jpa.hibernate.ddl-auto=validate
+spring.jpa.show-sql=false
+logging.level.root=WARN
+logging.level.com.edunex=INFO
 ```
 
-### Database Settings
-```properties
-# Auto-create/update tables
-spring.jpa.hibernate.ddl-auto=update
-
-# Show SQL queries (development)
-spring.jpa.show-sql=true
-
-# Production: Use validate or none
-# spring.jpa.hibernate.ddl-auto=validate
-```
-
-### File Upload
-```properties
-spring.servlet.multipart.max-file-size=10MB
-spring.servlet.multipart.max-request-size=10MB
-```
-
----
-
-## 📦 Deployment
-
-### Local Deployment
+### Build for Production
 
 ```bash
-# Build WAR file
-mvn clean package
-
-# Run with embedded Tomcat
-java -jar target/edunex-lms-0.0.1-SNAPSHOT.war
+./mvnw clean package -DskipTests
 ```
 
-### Production Deployment
+JAR file will be in `target/edunex-lms-0.0.1-SNAPSHOT.jar`
 
-1. **Build for production**:
+### Run Production Build
+
 ```bash
-mvn clean package -Pprod
+java -jar target/edunex-lms-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
 ```
 
-2. **Set environment variables**:
+### Docker Deployment (Optional)
+
+```dockerfile
+FROM openjdk:17-jdk-slim
+COPY target/*.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "/app.jar"]
+```
+
 ```bash
-export SPRING_DATASOURCE_URL=jdbc:mysql://prod-host:3306/edunex_db
-export SPRING_DATASOURCE_USERNAME=prod_user
-export SPRING_DATASOURCE_PASSWORD=secure_password
-export JWT_SECRET=your_production_jwt_secret_must_be_very_long
+docker build -t edunex-backend .
+docker run -p 8080:8080 edunex-backend
 ```
-
-3. **Deploy to Tomcat**:
-- Copy `edunex-lms-0.0.1-SNAPSHOT.war` to Tomcat's `webapps/` directory
-- Restart Tomcat
-
-4. **Production checklist**:
-- [ ] Change `spring.jpa.hibernate.ddl-auto` to `validate`
-- [ ] Disable SQL logging (`spring.jpa.show-sql=false`)
-- [ ] Use strong JWT secret (64+ characters)
-- [ ] Enable HTTPS
-- [ ] Configure proper CORS settings
-- [ ] Set up database backups
-- [ ] Configure logging to files
 
 ---
 
@@ -607,130 +579,58 @@ export JWT_SECRET=your_production_jwt_secret_must_be_very_long
 
 ### Common Issues
 
-#### 1. Port 8080 Already in Use
-```properties
-# Change in application.properties
-server.port=8081
+**1. Database Connection Failed**
 ```
-
-#### 2. Database Connection Failed
-```bash
-# Check MySQL status
-sudo systemctl status mysql
-
-# Verify database exists
-mysql -u root -p
-mysql> SHOW DATABASES LIKE 'edunex_db';
-
-# Check credentials match application.properties
+Error: Access denied for user 'edunex'@'localhost'
 ```
+- Verify MySQL is running: `sudo systemctl status mysql`
+- Check credentials in `application.properties`
+- Verify user permissions: `SHOW GRANTS FOR 'edunex'@'localhost';`
 
-#### 3. JWT Authentication Errors
-- **401 Unauthorized**: Check SecurityConfig endpoint permissions
-- **Token Expired**: Token expires after 24 hours by default
-- **Invalid Token**: Clear browser localStorage and login again
-```javascript
-// Clear token in browser console
-localStorage.clear();
+**2. Port Already in Use**
 ```
-
-#### 4. Modal Not Scrolling
-- Modals now have `overflow-y: auto` for scrolling
-- Background scroll disabled with `body { overflow: hidden }`
-- Fixed with recent updates
-
-#### 5. Build Failures
-```bash
-# Clean Maven cache
-mvn clean
-
-# Update dependencies
-mvn dependency:resolve
-
-# Force update
-mvn clean install -U
+Error: Port 8080 is already in use
 ```
+- Kill process: `kill -9 $(lsof -t -i:8080)`
+- Or change port in `application.properties`: `server.port=8081`
 
-#### 6. Empty Data Not Showing Messages
-- Check browser console for JavaScript errors
-- Verify API endpoints returning empty arrays (not errors)
-- Empty states implemented for courses, assignments, quizzes
+**3. JWT Token Invalid**
+```
+Error: JWT signature does not match
+```
+- Ensure `jwt.secret` is consistent across restarts
+- Check token expiration
+- Verify Authorization header format: `Bearer <token>`
 
----
-
-## 🚀 Future Enhancements
-
-### Planned Features
-- [ ] File upload for assignments
-- [ ] Real-time notifications
-- [ ] Discussion forums
-- [ ] Video conferencing integration
-- [ ] Mobile app (React Native)
-- [ ] Gradebook export (PDF/Excel)
-- [ ] Email notifications
-- [ ] Calendar integration
-- [ ] Course materials library
-- [ ] Advanced analytics dashboard
-
-### In Progress
-- [x] Activity logging system
-- [x] Scrollable modals
-- [x] Empty state handling
-- [x] Table views for all entities
+**4. Hibernate Schema Validation Failed**
+```
+Error: Table doesn't exist
+```
+- Change `spring.jpa.hibernate.ddl-auto` to `create-drop` for fresh start
+- Or run database migrations manually
 
 ---
 
-## 🤝 Contributing
+## 📚 Additional Resources
 
-Contributions are welcome! Please follow these steps:
-
-1. **Fork the repository**
-2. **Create a feature branch**
-   ```bash
-   git checkout -b feature/AmazingFeature
-   ```
-3. **Commit your changes**
-   ```bash
-   git commit -m 'Add some AmazingFeature'
-   ```
-4. **Push to the branch**
-   ```bash
-   git push origin feature/AmazingFeature
-   ```
-5. **Open a Pull Request**
-
-### Code Style
-- Follow Java naming conventions
-- Use Lombok for boilerplate reduction
-- Write meaningful commit messages
-- Add JavaDoc for public methods
-- Test your changes
+- [Spring Boot Documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/)
+- [Spring Security Reference](https://docs.spring.io/spring-security/reference/index.html)
+- [Hibernate ORM Documentation](https://hibernate.org/orm/documentation/)
+- [MySQL Documentation](https://dev.mysql.com/doc/)
+- [JWT.io](https://jwt.io/) - JWT debugger
 
 ---
 
-## 📄 License
+## 📝 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
----
-
-## 📞 Support
-
-For issues or questions:
-- **GitHub Issues**: [Open an issue](https://github.com/ashtonmths/EduNex/issues)
-- **Documentation**: Check this README and QUICKSTART.md
----
-
-## 🙏 Acknowledgments
-
-- Spring Boot Team for the excellent framework
-- Font Awesome for icons
-- Chart.js for dashboard visualizations
-- MySQL for reliable database management
-- The open-source community
+This project is part of the EduNex Learning Management System.
 
 ---
 
-**Built with ❤️ using Spring Boot 3.5.6**
+<div align="center">
 
-*Last Updated: November 2025*
+**[⬆ Back to Top](#-edunex-backend---spring-boot-api)**
+
+Made with ❤️ by the EduNex Team
+
+</div>

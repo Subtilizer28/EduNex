@@ -123,7 +123,7 @@ Before you begin, ensure you have the following installed:
 ### 1️⃣ Clone the Repository
 
 ```bash
-git clone https://github.com/Subtilizer28/EduNex.git
+git clone https://github.com/ashtonmths/EduNex.git
 cd EduNex
 ```
 
@@ -361,15 +361,13 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 ### Documentation
 - 📖 [Backend Documentation](backend/README.md)
 - 📖 [Frontend Documentation](frontend/README.md)
-- 📖 [Project Context for AI](PROJECT_CONTEXT.md)
 
 ### Get Help
-- 🐛 [Report Bug](https://github.com/Subtilizer28/EduNex/issues)
-- 💡 [Request Feature](https://github.com/Subtilizer28/EduNex/issues)
-- 📧 Email: support@edunex.com
+- 🐛 [Report Bug](https://github.com/ashtonmths/EduNex/issues)
+- 💡 [Request Feature](https://github.com/ashtonmths/EduNex/issues)
 
 ### Community
-- 💬 [Discussions](https://github.com/Subtilizer28/EduNex/discussions)
+- 💬 [Discussions](https://github.com/ashtonmths/EduNex/discussions)
 - ⭐ Star this repo if you find it helpful!
 
 ---
@@ -378,7 +376,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ### 🌟 Star us on GitHub!
 
-Made with ❤️ by the EduNex Team
+Made by the EduNex Team
 
 [⬆ Back to Top](#-edunex---modern-learning-management-system)
 
