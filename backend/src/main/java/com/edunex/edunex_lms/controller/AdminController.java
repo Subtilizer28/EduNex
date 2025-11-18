@@ -124,6 +124,73 @@ public class AdminController {
         }
     }
     
+    @PutMapping("/users/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody Map<String, Object> updateData) {
+        try {
+            User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+            
+            // Update fields if provided
+            if (updateData.containsKey("username")) {
+                String newUsername = (String) updateData.get("username");
+                if (userRepository.existsByUsername(newUsername) && !user.getUsername().equals(newUsername)) {
+                    return ResponseEntity.badRequest().body(Map.of("error", "Username already exists"));
+                }
+                user.setUsername(newUsername);
+            }
+            
+            if (updateData.containsKey("email")) {
+                String newEmail = (String) updateData.get("email");
+                if (userRepository.existsByEmail(newEmail) && !user.getEmail().equals(newEmail)) {
+                    return ResponseEntity.badRequest().body(Map.of("error", "Email already exists"));
+                }
+                user.setEmail(newEmail);
+            }
+            
+            if (updateData.containsKey("fullName")) {
+                user.setFullName((String) updateData.get("fullName"));
+            }
+            
+            if (updateData.containsKey("role")) {
+                String roleStr = (String) updateData.get("role");
+                user.setRole(User.Role.valueOf(roleStr.toUpperCase()));
+            }
+            
+            if (updateData.containsKey("usn")) {
+                user.setUsn((String) updateData.get("usn"));
+            }
+            
+            if (updateData.containsKey("phone")) {
+                user.setPhoneNumber((String) updateData.get("phone"));
+            }
+            
+            // Handle password update with bcrypt hashing
+            if (updateData.containsKey("password")) {
+                String password = (String) updateData.get("password");
+                if (password != null && !password.trim().isEmpty()) {
+                    user.setPassword(passwordEncoder.encode(password));
+                }
+            }
+            
+            User savedUser = userRepository.save(user);
+            
+            // Log activity
+            activityLogService.logActivity(
+                "USER_UPDATE",
+                "User updated: " + savedUser.getFullName(),
+                savedUser,
+                "User",
+                savedUser.getId()
+            );
+            
+            return ResponseEntity.ok(savedUser);
+        } catch (Exception e) {
+            log.error("Error updating user: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Failed to update user: " + e.getMessage()));
+        }
+    }
+    
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getSystemStats() {
         try {
