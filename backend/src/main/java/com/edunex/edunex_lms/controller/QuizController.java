@@ -103,4 +103,32 @@ public class QuizController {
         List<QuizAttempt> attempts = quizService.getUserAttempts(quizId, user.getId());
         return ResponseEntity.ok(attempts);
     }
+    
+    @GetMapping("/instructor/{instructorId}")
+    @PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")
+    public ResponseEntity<List<Quiz>> getInstructorQuizzes(@PathVariable Long instructorId) {
+        List<Quiz> quizzes = quizService.getInstructorQuizzes(instructorId);
+        return ResponseEntity.ok(quizzes);
+    }
+    
+    @GetMapping("/student/{studentId}")
+    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR', 'ADMIN')")
+    public ResponseEntity<List<Quiz>> getStudentQuizzes(@PathVariable Long studentId) {
+        List<Quiz> quizzes = quizService.getStudentQuizzes(studentId);
+        return ResponseEntity.ok(quizzes);
+    }
+    
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")
+    public ResponseEntity<Quiz> updateQuiz(@PathVariable Long id, @RequestBody Quiz quiz) {
+        Quiz updated = quizService.updateQuiz(id, quiz);
+        return ResponseEntity.ok(updated);
+    }
+    
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")
+    public ResponseEntity<Void> deleteQuiz(@PathVariable Long id) {
+        quizService.deleteQuiz(id);
+        return ResponseEntity.noContent().build();
+    }
 }

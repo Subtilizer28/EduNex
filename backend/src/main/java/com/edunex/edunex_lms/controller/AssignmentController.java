@@ -32,9 +32,11 @@ public class AssignmentController {
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<Assignment> submitAssignment(
             @PathVariable Long id,
-            @RequestParam Long studentId,
-            @RequestParam("file") MultipartFile file) {
-        Assignment submitted = assignmentService.submitAssignment(id, studentId, file);
+            @RequestParam("file") MultipartFile file,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        // Get student ID from authenticated user
+        User student = (User) userDetails;
+        Assignment submitted = assignmentService.submitAssignment(id, student.getId(), file);
         return ResponseEntity.ok(submitted);
     }
     
@@ -59,6 +61,14 @@ public class AssignmentController {
     @Transactional(readOnly = true)
     public ResponseEntity<List<Assignment>> getStudentAssignments(@PathVariable Long studentId) {
         List<Assignment> assignments = assignmentService.getStudentAssignments(studentId);
+        return ResponseEntity.ok(assignments);
+    }
+    
+    @GetMapping("/instructor/{instructorId}")
+    @PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<Assignment>> getInstructorAssignments(@PathVariable Long instructorId) {
+        List<Assignment> assignments = assignmentService.getInstructorAssignments(instructorId);
         return ResponseEntity.ok(assignments);
     }
     
