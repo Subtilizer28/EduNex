@@ -1,6 +1,7 @@
 package com.edunex.edunex_lms.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -69,6 +70,12 @@ public class User {
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+    
+    // Alias for 'enabled' to match frontend expectations
+    @JsonProperty("isActive")
+    public Boolean getIsActive() {
+        return enabled;
+    }
     
     public enum Role {
         ADMIN, INSTRUCTOR, STUDENT

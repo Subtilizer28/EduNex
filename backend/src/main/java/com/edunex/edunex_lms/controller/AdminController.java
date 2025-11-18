@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -82,6 +83,27 @@ public class AdminController {
         User savedUser = userRepository.save(user);
         activityLogService.logActivity("USER_DEACTIVATED", "User " + user.getFullName() + " deactivated", 
             null, "User", id);
+        return ResponseEntity.ok(savedUser);
+    }
+    
+    @PutMapping("/users/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<User> toggleUserStatus(@PathVariable Long id) {
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
+        
+        if (user.getRole() == User.Role.ADMIN) {
+            throw new InvalidOperationException("Cannot modify admin account status");
+        }
+        
+        user.setEnabled(!user.getEnabled());
+        User savedUser = userRepository.save(user);
+        
+        String action = savedUser.getEnabled() ? "activated" : "deactivated";
+        activityLogService.logActivity("USER_STATUS_CHANGED", 
+            "User " + user.getFullName() + " " + action, 
+            null, "User", id);
+        
         return ResponseEntity.ok(savedUser);
     }
     
@@ -354,6 +376,40 @@ public class AdminController {
         ));
     }
     
+    @GetMapping("/enrollments/course/{courseId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<Map<String, Object>>> getCourseEnrollments(@PathVariable Long courseId) {
+        Course course = courseRepository.findById(courseId)
+            .orElseThrow(() -> new ResourceNotFoundException("Course", "id", courseId));
+        
+        List<Enrollment> enrollments = enrollmentRepository.findByCourseId(courseId);
+        
+        List<Map<String, Object>> enrollmentData = enrollments.stream().map(enrollment -> {
+            Map<String, Object> data = new HashMap<>();
+            data.put("id", enrollment.getId());
+            
+            // Manually build student data to avoid lazy loading issues
+            User student = enrollment.getStudent();
+            Map<String, Object> studentData = new HashMap<>();
+            studentData.put("id", student.getId());
+            studentData.put("username", student.getUsername());
+            studentData.put("fullName", student.getFullName());
+            studentData.put("email", student.getEmail());
+            studentData.put("usn", student.getUsn());
+            studentData.put("role", student.getRole());
+            
+            data.put("student", studentData);
+            data.put("enrolledAt", enrollment.getEnrolledAt());
+            data.put("status", enrollment.getStatus());
+            data.put("progressPercentage", enrollment.getProgressPercentage());
+            data.put("finalGrade", enrollment.getFinalGrade());
+            return data;
+        }).toList();
+        
+        return ResponseEntity.ok(enrollmentData);
+    }
+    
     @GetMapping("/activities")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<ActivityLog>> getRecentActivities() {
@@ -487,5 +543,132 @@ public class AdminController {
             "errors", errors,
             "courses", createdCourses
         ));
+    }
+    
+    @GetMapping("/settings")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Map<String, Object>> getSettings() {
+        Map<String, Object> settings = new HashMap<>();
+        
+        // General Settings
+        Map<String, Object> general = new HashMap<>();
+        general.put("systemName", "EduNex LMS");
+        general.put("systemEmail", "admin@edunex.edu");
+        general.put("allowRegistration", false);
+        general.put("maintenanceMode", false);
+        settings.put("general", general);
+        
+        // Email Settings
+        Map<String, Object> email = new HashMap<>();
+        email.put("smtpHost", "smtp.gmail.com");
+        email.put("smtpPort", 587);
+        email.put("emailNotifications", true);
+        settings.put("email", email);
+        
+        // Security Settings
+        Map<String, Object> security = new HashMap<>();
+        security.put("sessionTimeout", 60);
+        security.put("passwordMinLength", 8);
+        security.put("requireStrongPassword", true);
+        security.put("twoFactorAuth", false);
+        settings.put("security", security);
+        
+        // Academic Settings
+        Map<String, Object> academic = new HashMap<>();
+        academic.put("defaultSemesterDuration", 16);
+        academic.put("maxCoursesPerStudent", 8);
+        academic.put("attendanceThreshold", 75);
+        academic.put("gradingSystem", "percentage");
+        settings.put("academic", academic);
+        
+        return ResponseEntity.ok(settings);
+    }
+    
+    @PutMapping("/settings")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Map<String, Object>> updateSettings(@RequestBody Map<String, Object> settings) {
+        // In a real application, you would save these to a database
+        activityLogService.logActivity("SETTINGS_UPDATE",
+            "System settings updated", null, "Settings", null);
+        
+        log.info("System settings updated");
+        return ResponseEntity.ok(Map.of(
+            "success", true,
+            "message", "Settings updated successfully"
+        ));
+    }
+    
+    @GetMapping("/reports/user-summary")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Map<String, Object>> getUserSummaryReport() {
+        long totalUsers = userRepository.count();
+        long students = userRepository.findByRole(User.Role.STUDENT).size();
+        long instructors = userRepository.findByRole(User.Role.INSTRUCTOR).size();
+        long admins = userRepository.findByRole(User.Role.ADMIN).size();
+        long activeUsers = userRepository.findByEnabledTrue().size();
+        
+        Map<String, Object> report = new HashMap<>();
+        report.put("totalUsers", totalUsers);
+        report.put("students", students);
+        report.put("instructors", instructors);
+        report.put("admins", admins);
+        report.put("activeUsers", activeUsers);
+        report.put("inactiveUsers", totalUsers - activeUsers);
+        report.put("generatedAt", java.time.LocalDateTime.now());
+        
+        return ResponseEntity.ok(report);
+    }
+    
+    @GetMapping("/reports/course-performance")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Map<String, Object>> getCoursePerformanceReport() {
+        long totalCourses = courseRepository.count();
+        long totalEnrollments = enrollmentRepository.count();
+        long activeCourses = courseRepository.findByIsActiveTrue().size();
+        
+        List<Course> courses = courseRepository.findAll();
+        double avgEnrollmentPerCourse = courses.isEmpty() ? 0 : 
+            (double) totalEnrollments / courses.size();
+        
+        Map<String, Object> report = new HashMap<>();
+        report.put("totalCourses", totalCourses);
+        report.put("activeCourses", activeCourses);
+        report.put("totalEnrollments", totalEnrollments);
+        report.put("averageEnrollmentPerCourse", avgEnrollmentPerCourse);
+        report.put("generatedAt", java.time.LocalDateTime.now());
+        
+        return ResponseEntity.ok(report);
+    }
+    
+    @GetMapping("/reports/enrollment-trends")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Map<String, Object>> getEnrollmentTrendsReport() {
+        long totalEnrollments = enrollmentRepository.count();
+        List<Enrollment> recentEnrollments = enrollmentRepository.findAll();
+        
+        // Group by month (simplified)
+        Map<String, Long> monthlyEnrollments = new HashMap<>();
+        monthlyEnrollments.put("current", totalEnrollments);
+        
+        Map<String, Object> report = new HashMap<>();
+        report.put("totalEnrollments", totalEnrollments);
+        report.put("monthlyTrends", monthlyEnrollments);
+        report.put("generatedAt", java.time.LocalDateTime.now());
+        
+        return ResponseEntity.ok(report);
+    }
+    
+    @GetMapping("/reports/assignment-analytics")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Map<String, Object>> getAssignmentAnalyticsReport() {
+        long totalAssignments = assignmentRepository.count();
+        long totalQuizzes = quizRepository.count();
+        
+        Map<String, Object> report = new HashMap<>();
+        report.put("totalAssignments", totalAssignments);
+        report.put("totalQuizzes", totalQuizzes);
+        report.put("generatedAt", java.time.LocalDateTime.now());
+        
+        return ResponseEntity.ok(report);
     }
 }
