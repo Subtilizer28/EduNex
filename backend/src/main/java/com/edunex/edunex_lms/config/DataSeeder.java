@@ -22,8 +22,6 @@ public class DataSeeder implements CommandLineRunner {
     private final CourseRepository courseRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final AssignmentRepository assignmentRepository;
-    private final QuizRepository quizRepository;
-    private final QuestionRepository questionRepository;
     private final AttendanceRepository attendanceRepository;
     private final PasswordEncoder passwordEncoder;
     
@@ -34,80 +32,106 @@ public class DataSeeder implements CommandLineRunner {
             return;
         }
         
-        log.info("Seeding database with initial data...");
+        log.info("Seeding database with initial data for EduNex LMS...");
         
         // Create Admin
         User admin = createUser("admin", "admin@edunex.com", "Admin User", User.Role.ADMIN, null);
         
-        // Create Instructors
-        User instructor1 = createUser("john.doe", "john@edunex.com", "Dr. John Doe", User.Role.INSTRUCTOR, null);
-        User instructor2 = createUser("jane.smith", "jane@edunex.com", "Prof. Jane Smith", User.Role.INSTRUCTOR, null);
-        User instructor3 = createUser("mike.wilson", "mike@edunex.com", "Dr. Mike Wilson", User.Role.INSTRUCTOR, null);
+        // Create Instructors with realistic profiles
+        User instructor1 = createUser("john.doe", "john.doe@edunex.com", "Dr. John Doe", User.Role.INSTRUCTOR, null);
+        User instructor2 = createUser("jane.smith", "jane.smith@edunex.com", "Prof. Jane Smith", User.Role.INSTRUCTOR, null);
+        User instructor3 = createUser("mike.wilson", "mike.wilson@edunex.com", "Dr. Mike Wilson", User.Role.INSTRUCTOR, null);
+        User instructor4 = createUser("sarah.johnson", "sarah.johnson@edunex.com", "Dr. Sarah Johnson", User.Role.INSTRUCTOR, null);
         
-        // Create Students with USN (username = usn)
+        // Create Students with USN format (NNM23CS001-030)
         List<User> students = new ArrayList<>();
-        students.add(createStudent("NNM23CS001", "alice@student.edu", "Alice Johnson"));
-        students.add(createStudent("NNM23CS002", "bob@student.edu", "Bob Brown"));
-        students.add(createStudent("NNM23CS003", "charlie@student.edu", "Charlie Davis"));
-        students.add(createStudent("NNM23CS004", "diana@student.edu", "Diana Evans"));
-        students.add(createStudent("NNM23CS005", "emma@student.edu", "Emma Wilson"));
-        students.add(createStudent("NNM23CS006", "frank@student.edu", "Frank Moore"));
-        students.add(createStudent("NNM23CS007", "grace@student.edu", "Grace Taylor"));
-        students.add(createStudent("NNM23CS008", "henry@student.edu", "Henry Anderson"));
-        students.add(createStudent("NNM23CS009", "ivy@student.edu", "Ivy Roberts"));
-        students.add(createStudent("NNM23CS010", "jack@student.edu", "Jack Thompson"));
-        students.add(createStudent("NNM23CS011", "kate@student.edu", "Kate Martinez"));
-        students.add(createStudent("NNM23CS012", "liam@student.edu", "Liam Garcia"));
-        students.add(createStudent("NNM23CS013", "mia@student.edu", "Mia Rodriguez"));
-        students.add(createStudent("NNM23CS014", "noah@student.edu", "Noah Lopez"));
-        students.add(createStudent("NNM23CS015", "olivia@student.edu", "Olivia Hernandez"));
+        String[] studentNames = {
+            "Alice Johnson", "Bob Brown", "Charlie Davis", "Diana Evans", "Emma Wilson",
+            "Frank Moore", "Grace Taylor", "Henry Anderson", "Ivy Roberts", "Jack Thompson",
+            "Kate Martinez", "Liam Garcia", "Mia Rodriguez", "Noah Lopez", "Olivia Hernandez",
+            "Peter White", "Quinn Thomas", "Rachel Green", "Sam Harris", "Tina Clark",
+            "Uma Patel", "Victor Lee", "Wendy Kim", "Xavier Cruz", "Yara Singh",
+            "Zack Miller", "Anna Scott", "Ben Turner", "Cara Phillips", "Dan Campbell"
+        };
         
-        // Create Courses
-        Course course1 = createCourse("CS101", "Introduction to Programming", 
-            "Learn the fundamentals of programming using Java", "Computer Science", 
-            3, instructor1);
+        for (int i = 0; i < 30; i++) {
+            String usn = String.format("NNM23CS%03d", i + 1);
+            String email = studentNames[i].toLowerCase().replace(" ", ".") + "@student.edu";
+            students.add(createStudent(usn, email, studentNames[i]));
+        }
         
-        Course course2 = createCourse("CS201", "Data Structures and Algorithms",
-            "Master essential data structures and algorithmic techniques", "Computer Science",
-            4, instructor1);
+        // Create diverse course catalog
+        Course javaCourse = createCourse("CS101", "Introduction to Programming", 
+            "Learn programming fundamentals using Java. Topics include variables, control structures, OOP, and basic algorithms.", 
+            "Programming", 4, instructor1);
         
-        Course course3 = createCourse("WEB301", "Web Development",
-            "Build modern web applications with Spring Boot and React", "Web Development",
-            3, instructor2);
+        Course dsaCourse = createCourse("CS201", "Data Structures and Algorithms",
+            "Master essential data structures (arrays, linked lists, trees, graphs) and algorithmic problem-solving techniques.",
+            "Computer Science", 4, instructor1);
         
-        Course course4 = createCourse("DB401", "Database Management Systems",
-            "Design and implement relational databases", "Database",
-            4, instructor2);
+        Course webCourse = createCourse("WEB301", "Full Stack Web Development",
+            "Build modern web applications with Spring Boot backend and React frontend. Includes REST APIs and database integration.",
+            "Web Development", 4, instructor2);
         
-        Course course5 = createCourse("AI501", "Artificial Intelligence",
-            "Introduction to AI concepts and machine learning", "AI/ML",
-            4, instructor3);
+        Course dbCourse = createCourse("DB401", "Database Management Systems",
+            "Learn database design, SQL, transactions, and query optimization. Hands-on experience with MySQL and PostgreSQL.",
+            "Database", 3, instructor2);
         
-        // Enroll students in courses
-        enrollStudentsInCourse(students.subList(0, 8), course1);   // 8 students in CS101
-        enrollStudentsInCourse(students.subList(4, 12), course2);  // 8 students in CS201
-        enrollStudentsInCourse(students.subList(0, 10), course3);  // 10 students in WEB301
-        enrollStudentsInCourse(students.subList(5, 15), course4);  // 10 students in DB401
-        enrollStudentsInCourse(students.subList(2, 10), course5);  // 8 students in AI501
+        Course aiCourse = createCourse("AI501", "Artificial Intelligence Fundamentals",
+            "Introduction to AI concepts including machine learning, neural networks, and natural language processing.",
+            "AI/ML", 4, instructor3);
         
-        // Create assignments
-        createAssignments(course1);
-        createAssignments(course2);
-        createAssignments(course3);
+        Course securityCourse = createCourse("SEC301", "Cybersecurity Essentials",
+            "Learn security principles, cryptography, network security, and secure coding practices.",
+            "Security", 3, instructor3);
         
-        // Create quizzes
-        createQuizzes(course1);
-        createQuizzes(course2);
+        Course mobileCourse = createCourse("MOB401", "Mobile App Development",
+            "Build native Android and iOS applications. Learn mobile UI/UX design and platform-specific APIs.",
+            "Mobile Development", 3, instructor4);
         
-        // Create attendance records
-        createAttendanceRecords(students, course1);
-        createAttendanceRecords(students, course2);
+        Course cloudCourse = createCourse("CLD501", "Cloud Computing",
+            "Master cloud platforms (AWS, Azure, GCP), containerization with Docker, and Kubernetes orchestration.",
+            "Cloud Computing", 4, instructor4);
         
-        log.info("Database seeding completed successfully!");
-        log.info("Admin credentials - Username: admin, Password: password123");
-        log.info("Instructor credentials - Username: john.doe, Password: password123");
-        log.info("Student credentials - Username: NNM23CS001 (USN), Password: password123");
-        log.info("Total students created: " + students.size());
+        // Enroll students in courses (realistic distribution)
+        enrollStudentsInCourse(students.subList(0, 25), javaCourse);    // 25 students - intro course
+        enrollStudentsInCourse(students.subList(5, 20), dsaCourse);     // 15 students
+        enrollStudentsInCourse(students.subList(0, 18), webCourse);     // 18 students
+        enrollStudentsInCourse(students.subList(8, 22), dbCourse);      // 14 students
+        enrollStudentsInCourse(students.subList(10, 20), aiCourse);     // 10 students
+        enrollStudentsInCourse(students.subList(15, 28), securityCourse); // 13 students
+        enrollStudentsInCourse(students.subList(3, 15), mobileCourse);  // 12 students
+        enrollStudentsInCourse(students.subList(12, 24), cloudCourse);  // 12 students
+        
+        // Create assignments for each course
+        createAssignmentsForCourse(javaCourse, "Variables and Data Types", "Control Structures", "OOP Concepts");
+        createAssignmentsForCourse(dsaCourse, "Linked Lists Implementation", "Binary Trees", "Graph Algorithms");
+        createAssignmentsForCourse(webCourse, "REST API Development", "React Components", "Full Stack Integration");
+        createAssignmentsForCourse(dbCourse, "Database Design", "SQL Queries", "Transaction Management");
+        createAssignmentsForCourse(aiCourse, "Linear Regression", "Neural Networks", "NLP Project");
+        
+        // Create attendance records for active courses
+        createAttendanceRecords(students.subList(0, 25), javaCourse);
+        createAttendanceRecords(students.subList(5, 20), dsaCourse);
+        createAttendanceRecords(students.subList(0, 18), webCourse);
+        
+        // Grade some assignments
+        gradeSubmittedAssignments();
+        
+        log.info("╔════════════════════════════════════════════════════════════╗");
+        log.info("║         EduNex LMS - Database Seeding Completed!          ║");
+        log.info("╚════════════════════════════════════════════════════════════╝");
+        log.info("📚 Courses created: 8");
+        log.info("👥 Total users created: {}", students.size() + 5);
+        log.info("   - Admin: 1");
+        log.info("   - Instructors: 4");
+        log.info("   - Students: {}", students.size());
+        log.info("───────────────────────────────────────────────────────────");
+        log.info("🔐 Default credentials:");
+        log.info("   Admin     → Username: admin      | Password: password123");
+        log.info("   Instructor → Username: john.doe   | Password: password123");
+        log.info("   Student   → Username: NNM23CS001 (USN) | Password: password123");
+        log.info("═══════════════════════════════════════════════════════════");
     }
     
     private User createUser(String username, String email, String fullName, User.Role role, String usn) {
@@ -152,81 +176,57 @@ public class DataSeeder implements CommandLineRunner {
         }
     }
     
-    private void createAssignments(Course course) {
-        for (int i = 1; i <= 3; i++) {
+    private void createAssignmentsForCourse(Course course, String... titles) {
+        for (int i = 0; i < titles.length; i++) {
             Assignment assignment = new Assignment();
             assignment.setCourse(course);
-            assignment.setTitle("Assignment " + i + " - " + course.getCourseName());
-            assignment.setDescription("Complete the exercises and submit your solution.");
-            assignment.setDueDate(LocalDateTime.now().plusDays(7 * i));
+            assignment.setTitle(titles[i]);
+            assignment.setDescription("Complete the assignment on " + titles[i] + ". Submit your solution before the deadline.");
+            assignment.setDueDate(LocalDateTime.now().plusDays(7 * (i + 1)));
             assignment.setMaxMarks(100);
             assignment.setStatus(Assignment.SubmissionStatus.PENDING);
             assignmentRepository.save(assignment);
         }
     }
     
-    private void createQuizzes(Course course) {
-        Quiz quiz = new Quiz();
-        quiz.setCourse(course);
-        quiz.setTitle("Midterm Quiz - " + course.getCourseName());
-        quiz.setDescription("Test your knowledge of the first half of the course");
-        quiz.setDurationMinutes(60);
-        quiz.setTotalMarks(100);
-        quiz.setPassingMarks(60);
-        quiz.setMaxAttempts(2);
-        quiz.setIsActive(true);
-        quiz = quizRepository.save(quiz);
+    private void gradeSubmittedAssignments() {
+        // Simulate some graded assignments
+        List<Assignment> assignments = assignmentRepository.findAll();
+        List<User> students = userRepository.findByRole(User.Role.STUDENT);
         
-        // Create questions
-        createQuestions(quiz);
-    }
-    
-    private void createQuestions(Quiz quiz) {
-        // MCQ Question
-        Question q1 = new Question();
-        q1.setQuiz(quiz);
-        q1.setQuestionText("What is the output of System.out.println(5 + 3);?");
-        q1.setQuestionType(Question.QuestionType.MCQ);
-        q1.setMarks(10);
-        q1.setCorrectAnswer("8");
-        q1.setOptionA("5");
-        q1.setOptionB("3");
-        q1.setOptionC("8");
-        q1.setOptionD("53");
-        q1.setQuestionOrder(1);
-        questionRepository.save(q1);
-        
-        // True/False Question
-        Question q2 = new Question();
-        q2.setQuiz(quiz);
-        q2.setQuestionText("Java is a platform-independent language.");
-        q2.setQuestionType(Question.QuestionType.TRUE_FALSE);
-        q2.setMarks(5);
-        q2.setCorrectAnswer("True");
-        q2.setQuestionOrder(2);
-        questionRepository.save(q2);
-        
-        // Short Answer
-        Question q3 = new Question();
-        q3.setQuiz(quiz);
-        q3.setQuestionText("Explain what OOP stands for.");
-        q3.setQuestionType(Question.QuestionType.SHORT_ANSWER);
-        q3.setMarks(15);
-        q3.setCorrectAnswer("Object-Oriented Programming");
-        q3.setQuestionOrder(3);
-        questionRepository.save(q3);
+        for (int i = 0; i < Math.min(5, assignments.size()); i++) {
+            Assignment assignment = assignments.get(i);
+            for (int j = 0; j < Math.min(3, students.size()); j++) {
+                User student = students.get(j);
+                Assignment submission = new Assignment();
+                submission.setCourse(assignment.getCourse());
+                submission.setTitle(assignment.getTitle());
+                submission.setDescription(assignment.getDescription());
+                submission.setDueDate(assignment.getDueDate());
+                submission.setMaxMarks(assignment.getMaxMarks());
+                submission.setStudent(student);
+                submission.setSubmissionUrl("https://example.com/submissions/file" + i + "_" + j + ".pdf");
+                submission.setSubmittedAt(LocalDateTime.now().minusDays(2));
+                submission.setMarksObtained((int)(70 + Math.random() * 30)); // 70-100
+                submission.setFeedback("Good work! " + (submission.getMarksObtained() >= 85 ? "Excellent understanding." : "Keep practicing."));
+                submission.setStatus(Assignment.SubmissionStatus.GRADED);
+                assignmentRepository.save(submission);
+            }
+        }
     }
     
     private void createAttendanceRecords(List<User> students, Course course) {
         LocalDate today = LocalDate.now();
-        for (int day = 0; day < 10; day++) {
+        // Create attendance for last 15 days
+        for (int day = 0; day < 15; day++) {
             LocalDate date = today.minusDays(day);
-            for (User student : students.subList(0, Math.min(5, students.size()))) {
+            for (User student : students) {
                 Attendance attendance = new Attendance();
                 attendance.setStudent(student);
                 attendance.setCourse(course);
                 attendance.setAttendanceDate(date);
-                attendance.setStatus(Math.random() > 0.2 ? 
+                // 85% attendance rate
+                attendance.setStatus(Math.random() > 0.15 ? 
                     Attendance.AttendanceStatus.PRESENT : Attendance.AttendanceStatus.ABSENT);
                 attendanceRepository.save(attendance);
             }
