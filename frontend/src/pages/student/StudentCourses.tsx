@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { BookOpen, Users, Clock } from 'lucide-react';
+import { BookOpen, Users, Clock, FileText, ExternalLink, Video, File, Link as LinkIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/authStore';
 import { enrollmentAPI } from '@/lib/api';
@@ -16,9 +18,20 @@ interface Enrollment {
   enrolledAt: string;
 }
 
+interface CourseMaterial {
+  id: number;
+  title: string;
+  description?: string;
+  type: "DOCUMENT" | "VIDEO" | "LINK" | "OTHER";
+  url: string;
+}
+
 export default function StudentCourses() {
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCourse, setSelectedCourse] = useState<Enrollment | null>(null);
+  const [courseMaterials, setCourseMaterials] = useState<CourseMaterial[]>([]);
+  const [loadingMaterials, setLoadingMaterials] = useState(false);
   const { user } = useAuthStore();
 
   useEffect(() => {
@@ -38,6 +51,69 @@ export default function StudentCourses() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchCourseMaterials = async (courseId: number) => {
+    try {
+      setLoadingMaterials(true);
+      // TODO: Replace with actual API call
+      const mockMaterials: CourseMaterial[] = [
+        {
+          id: 1,
+          title: "Introduction to Arrays and Linked Lists",
+          description: "Comprehensive guide covering array operations and linked list implementations",
+          type: "DOCUMENT",
+          url: "https://example.com/materials/arrays-linkedlists.pdf"
+        },
+        {
+          id: 2,
+          title: "Sorting Algorithms Explained",
+          description: "Video tutorial on bubble sort, merge sort, and quick sort with animations",
+          type: "VIDEO",
+          url: "https://youtube.com/watch?v=example"
+        },
+        {
+          id: 3,
+          title: "Binary Trees Tutorial",
+          description: "Interactive tutorial on binary tree traversal algorithms",
+          type: "LINK",
+          url: "https://visualgo.net/en/bst"
+        }
+      ];
+      setCourseMaterials(mockMaterials);
+    } catch (error) {
+      toast.error('Failed to fetch course materials');
+    } finally {
+      setLoadingMaterials(false);
+    }
+  };
+
+  const handleViewMaterials = (enrollment: Enrollment) => {
+    setSelectedCourse(enrollment);
+    fetchCourseMaterials(enrollment.courseId);
+  };
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case "DOCUMENT":
+        return <FileText className="h-4 w-4" />;
+      case "VIDEO":
+        return <Video className="h-4 w-4" />;
+      case "LINK":
+        return <LinkIcon className="h-4 w-4" />;
+      default:
+        return <File className="h-4 w-4" />;
+    }
+  };
+
+  const getTypeBadge = (type: string) => {
+    const colors = {
+      DOCUMENT: "bg-blue-500",
+      VIDEO: "bg-purple-500",
+      LINK: "bg-green-500",
+      OTHER: "bg-gray-500",
+    };
+    return <Badge className={colors[type as keyof typeof colors] || "bg-gray-500"}>{type}</Badge>;
   };
 
   if (loading) {
@@ -97,8 +173,72 @@ export default function StudentCourses() {
                   <span className="font-medium">{new Date(enrollment.enrolledAt).toLocaleDateString()}</span>
                 </div>
 
-                <div className="pt-4 border-t">
+                <div className="pt-4 border-t space-y-2">
                   <Badge variant="outline" className="w-full justify-center">Active</Badge>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full"
+                        onClick={() => handleViewMaterials(enrollment)}
+                      >
+                        <FileText className="h-4 w-4 mr-2" />
+                        View Materials
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>{selectedCourse?.courseName} - Materials</DialogTitle>
+                        <DialogDescription>
+                          Course resources and learning materials
+                        </DialogDescription>
+                      </DialogHeader>
+                      
+                      {loadingMaterials ? (
+                        <div className="flex items-center justify-center py-8">
+                          <p className="text-gray-500">Loading materials...</p>
+                        </div>
+                      ) : courseMaterials.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-12">
+                          <FileText className="h-16 w-16 text-gray-300 mb-4" />
+                          <p className="text-gray-500">No materials available yet</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          {courseMaterials.map((material) => (
+                            <Card key={material.id} className="hover:bg-gray-50">
+                              <CardContent className="p-4">
+                                <div className="flex items-start gap-4">
+                                  <div className="flex-shrink-0 mt-1">
+                                    {getTypeIcon(material.type)}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <h4 className="font-semibold text-sm">{material.title}</h4>
+                                      {getTypeBadge(material.type)}
+                                    </div>
+                                    {material.description && (
+                                      <p className="text-sm text-gray-600 mb-2">
+                                        {material.description}
+                                      </p>
+                                    )}
+                                  </div>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => window.open(material.url, "_blank")}
+                                  >
+                                    <ExternalLink className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      )}
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
             </CardContent>
