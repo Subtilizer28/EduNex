@@ -1,4 +1,4 @@
-import { Moon, Sun, User, LogOut, Bell } from 'lucide-react';
+import { Moon, Sun, User, LogOut } from 'lucide-react';
 import { useThemeStore } from '@/store/themeStore';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Badge } from '@/components/ui/badge';
 
 export const DashboardHeader = () => {
   const { theme, toggleTheme } = useThemeStore();
@@ -22,13 +21,6 @@ export const DashboardHeader = () => {
       <SidebarTrigger />
       
       <div className="flex-1" />
-
-      <Button variant="ghost" size="icon" className="relative">
-        <Bell className="h-5 w-5" />
-        <Badge className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs">
-          3
-        </Badge>
-      </Button>
 
       <Button variant="ghost" size="icon" onClick={toggleTheme}>
         {theme === 'light' ? (
@@ -42,10 +34,10 @@ export const DashboardHeader = () => {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-              {user?.name.charAt(0).toUpperCase()}
+              {user?.fullName?.charAt(0).toUpperCase()}
             </div>
             <div className="hidden flex-col items-start text-left md:flex">
-              <span className="text-sm font-medium">{user?.name}</span>
+              <span className="text-sm font-medium">{user?.fullName}</span>
               <span className="text-xs text-muted-foreground">{user?.role}</span>
             </div>
           </Button>

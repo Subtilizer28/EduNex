@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from 'axios';
+import { useAuthStore } from '@/store/authStore';
 
 const API_BASE_URL = 'http://localhost:8080/api';
 
@@ -15,6 +16,13 @@ api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     if (token) {
+      // Validate token before making request
+      const authStore = useAuthStore.getState();
+      if (!authStore.isTokenValid()) {
+        authStore.logout();
+        window.location.href = '/login';
+        return Promise.reject(new Error('Token expired'));
+      }
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -29,9 +37,19 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+      // Unauthorized - clear auth and redirect to login
+      const authStore = useAuthStore.getState();
+      authStore.logout();
+      
+      // Only redirect if not already on login page
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+    } else if (error.response?.status === 403) {
+      // Forbidden - user doesn't have permission
+      if (window.location.pathname !== '/unauthorized') {
+        window.location.href = '/unauthorized';
+      }
     }
     return Promise.reject(error);
   }
@@ -53,7 +71,23 @@ export const adminAPI = {
   getCourses: () => api.get('/admin/courses'),
   createCourse: (courseData: any) => api.post('/admin/courses', courseData),
   deleteCourse: (id: number) => api.delete(`/admin/courses/${id}`),
-  getCourseEnrollments: (courseId: number) => api.get(`/admin/enrollments/${courseId}`),
+  getCourseEnrollments: (courseId: number) => api.get(`/admin/enrollments/course/${courseId}`),
+  getStats: () => api.get('/admin/stats'),
+  getRecentActivities: () => api.get('/admin/activities/recent'),
+  bulkCreateUsers: (data: { 
+    prefix: string; 
+    startRange: number; 
+    endRange: number; 
+    role?: string; 
+    password?: string 
+  }) => api.post('/admin/users/bulk', data),
+  bulkCreateCourses: (coursesData: any[]) => api.post('/admin/courses/bulk', coursesData),
+  getSettings: () => api.get('/admin/settings'),
+  updateSettings: (settings: any) => api.put('/admin/settings', settings),
+  getUserSummaryReport: () => api.get('/admin/reports/user-summary'),
+  getCoursePerformanceReport: () => api.get('/admin/reports/course-performance'),
+  getEnrollmentTrendsReport: () => api.get('/admin/reports/enrollment-trends'),
+  getAssignmentAnalyticsReport: () => api.get('/admin/reports/assignment-analytics'),
 };
 
 // Course API
@@ -73,6 +107,7 @@ export const enrollmentAPI = {
     api.post('/enrollments/bulk-enroll', data),
   getCourseEnrollments: (courseId: number) => api.get(`/enrollments/course/${courseId}`),
   getStudentEnrollments: (studentId: number) => api.get(`/enrollments/student/${studentId}`),
+  getMyEnrollments: () => api.get('/enrollments/my-enrollments'),
 };
 
 // Assignment API
@@ -106,6 +141,7 @@ export const attendanceAPI = {
   markAttendance: (data: any) => api.post('/attendance/mark', data),
   getCourseAttendance: (courseId: number) => api.get(`/attendance/course/${courseId}`),
   getStudentAttendance: (studentId: number) => api.get(`/attendance/student/${studentId}`),
+  getMyAttendance: () => api.get('/attendance/my-attendance'),
 };
 
 export default api;
