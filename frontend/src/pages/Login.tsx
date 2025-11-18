@@ -43,8 +43,6 @@ const Login = () => {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    console.log('Login form submitted:', data);
-    
     // Basic validation
     if (!data.username || !data.password) {
       toast.error('Please fill in all fields');
@@ -60,7 +58,7 @@ const Login = () => {
       const user = {
         id,
         usn: username,
-        name: fullName,
+        fullName,
         email,
         role: role.replace('ROLE_', '') as 'ADMIN' | 'INSTRUCTOR' | 'STUDENT',
         isActive: true,
@@ -163,11 +161,10 @@ const Login = () => {
               </Label>
             </div>
 
-            <Button 
-              type="submit" 
-              className="w-full" 
+            <Button
+              type="submit"
+              className="w-full"
               disabled={isLoading}
-              onClick={() => console.log('Login button clicked')}
             >
               {isLoading ? (
                 <>
