@@ -98,7 +98,7 @@ export default function AdminCourses() {
       (course) =>
         course.courseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         course.courseCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        course.instructor?.name.toLowerCase().includes(searchTerm.toLowerCase())
+        course.instructor?.fullName.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredCourses(filtered);
   }, [courses, searchTerm]);
@@ -240,7 +240,7 @@ export default function AdminCourses() {
               <div className="space-y-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Instructor</p>
-                  <p className="font-medium">{course.instructor?.name}</p>
+                  <p className="font-medium">{course.instructor?.fullName}</p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -325,7 +325,7 @@ export default function AdminCourses() {
                   <SelectContent>
                     {instructors.map((instructor) => (
                       <SelectItem key={instructor.id} value={instructor.id.toString()}>
-                        {instructor.name}
+                        {instructor.fullName}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -381,7 +381,7 @@ export default function AdminCourses() {
                 </div>
                 <div>
                   <Label>Instructor</Label>
-                  <p className="text-lg font-medium">{selectedCourse.instructor?.name}</p>
+                  <p className="text-lg font-medium">{selectedCourse.instructor?.fullName}</p>
                 </div>
                 <div>
                   <Label>Credits</Label>
@@ -421,7 +421,7 @@ export default function AdminCourses() {
                     {enrolledStudents.map((enrollment: any) => (
                       <TableRow key={enrollment.id}>
                         <TableCell>{enrollment.student.usn}</TableCell>
-                        <TableCell>{enrollment.student.name}</TableCell>
+                        <TableCell>{enrollment.student.fullName}</TableCell>
                         <TableCell>{enrollment.student.email}</TableCell>
                         <TableCell>{new Date(enrollment.enrolledAt).toLocaleDateString()}</TableCell>
                       </TableRow>

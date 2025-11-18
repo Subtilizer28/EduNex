@@ -1,6 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, useEffect } from 'react';
 import { StatCard } from '@/components/StatCard';
 import { Users, BookOpen, UserCheck, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from 'sonner';
+import { adminAPI } from '@/lib/api';
 import {
   LineChart,
   Line,
@@ -14,24 +18,41 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-const userTrendData = [
-  { month: 'Jan', users: 45 },
-  { month: 'Feb', users: 52 },
-  { month: 'Mar', users: 61 },
-  { month: 'Apr', users: 75 },
-  { month: 'May', users: 88 },
-  { month: 'Jun', users: 95 },
-];
-
-const courseEnrollmentData = [
-  { course: 'CS101', enrollments: 45 },
-  { course: 'CS102', enrollments: 38 },
-  { course: 'CS201', enrollments: 52 },
-  { course: 'CS202', enrollments: 41 },
-  { course: 'MATH101', enrollments: 60 },
-];
-
 const AdminDashboard = () => {
+  const [stats, setStats] = useState<any>(null);
+  const [activities, setActivities] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const [statsResponse, activitiesResponse] = await Promise.all([
+        adminAPI.getStats(),
+        adminAPI.getRecentActivities().catch(() => ({ data: [] })),
+      ]);
+      
+      setStats(statsResponse.data);
+      setActivities(activitiesResponse.data || []);
+    } catch (error: any) {
+      toast.error('Failed to load dashboard data', {
+        description: error.response?.data?.message || 'Unable to fetch statistics',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-lg">Loading dashboard...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -44,106 +65,79 @@ const AdminDashboard = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Total Users"
-          value={245}
+          value={stats?.totalUsers || 0}
           icon={Users}
-          description="Active users in the system"
-          trend={{ value: 12, isPositive: true }}
+          description={`${stats?.students || 0} students, ${stats?.instructors || 0} instructors`}
         />
         <StatCard
           title="Total Courses"
-          value={48}
+          value={stats?.totalCourses || 0}
           icon={BookOpen}
           description="Available courses"
-          trend={{ value: 8, isPositive: true }}
         />
         <StatCard
           title="Active Enrollments"
-          value={1240}
+          value={stats?.totalEnrollments || 0}
           icon={UserCheck}
           description="Students enrolled"
-          trend={{ value: 15, isPositive: true }}
         />
         <StatCard
-          title="Completion Rate"
-          value="87%"
+          title="Assignments"
+          value={stats?.totalAssignments || 0}
           icon={TrendingUp}
-          description="Average course completion"
-          trend={{ value: 5, isPositive: true }}
+          description={`${stats?.totalQuizzes || 0} quizzes created`}
         />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>User Registration Trends</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={userTrendData}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="month" className="text-xs" />
-                <YAxis className="text-xs" />
-                <Tooltip />
-                <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="users"
-                  stroke="hsl(var(--primary))"
-                  strokeWidth={2}
-                  name="New Users"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Course Enrollment Distribution</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={courseEnrollmentData}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="course" className="text-xs" />
-                <YAxis className="text-xs" />
-                <Tooltip />
-                <Legend />
-                <Bar
-                  dataKey="enrollments"
-                  fill="hsl(var(--secondary))"
-                  name="Enrollments"
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>System Overview</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="rounded-lg border p-4">
+              <p className="text-sm font-medium text-muted-foreground">Admins</p>
+              <p className="text-2xl font-bold">{stats?.admins || 0}</p>
+            </div>
+            <div className="rounded-lg border p-4">
+              <p className="text-sm font-medium text-muted-foreground">Instructors</p>
+              <p className="text-2xl font-bold">{stats?.instructors || 0}</p>
+            </div>
+            <div className="rounded-lg border p-4">
+              <p className="text-sm font-medium text-muted-foreground">Students</p>
+              <p className="text-2xl font-bold">{stats?.students || 0}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
           <CardTitle>Recent Activity</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {[
-              { action: 'New user registered', user: 'John Doe', time: '2 minutes ago' },
-              { action: 'Course created', user: 'Dr. Smith', time: '15 minutes ago' },
-              { action: 'Assignment submitted', user: 'Jane Wilson', time: '1 hour ago' },
-              { action: 'Quiz completed', user: 'Mike Johnson', time: '2 hours ago' },
-            ].map((activity, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0"
-              >
-                <div>
-                  <p className="font-medium">{activity.action}</p>
-                  <p className="text-sm text-muted-foreground">{activity.user}</p>
+          {activities.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">No recent activities</p>
+          ) : (
+            <div className="space-y-4">
+              {activities.slice(0, 5).map((activity: any, index: number) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0"
+                >
+                  <div>
+                    <p className="font-medium">{activity.description || activity.action}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {activity.entityType} • {activity.actionType}
+                    </p>
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(activity.timestamp || activity.createdAt).toLocaleString()}
+                  </span>
                 </div>
-                <span className="text-xs text-muted-foreground">{activity.time}</span>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

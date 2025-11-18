@@ -51,7 +51,6 @@ export default function AdminUsers() {
     email: '',
     password: '',
     role: 'STUDENT' as UserRole,
-    department: '',
     phone: '',
   });
 
@@ -74,7 +73,7 @@ export default function AdminUsers() {
     if (searchTerm) {
       filtered = filtered.filter(
         (user) =>
-          user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
           user.usn.toLowerCase().includes(searchTerm.toLowerCase()) ||
           user.email.toLowerCase().includes(searchTerm.toLowerCase())
       );
@@ -137,7 +136,7 @@ export default function AdminUsers() {
   };
 
   const handleDeleteUser = async (user: User) => {
-    if (!confirm(`Are you sure you want to delete ${user.name}?`)) return;
+    if (!confirm(`Are you sure you want to delete ${user.fullName}?`)) return;
 
     try {
       await adminAPI.deleteUser(user.id);
@@ -166,11 +165,10 @@ export default function AdminUsers() {
     setSelectedUser(user);
     setFormData({
       usn: user.usn,
-      name: user.name,
+      name: user.fullName,
       email: user.email,
       password: '',
       role: user.role,
-      department: user.department || '',
       phone: user.phone || '',
     });
     setIsEditModalOpen(true);
@@ -183,7 +181,6 @@ export default function AdminUsers() {
       email: '',
       password: '',
       role: 'STUDENT',
-      department: '',
       phone: '',
     });
     setSelectedUser(null);
@@ -248,15 +245,6 @@ export default function AdminUsers() {
               <SelectItem value="ADMIN">Admin</SelectItem>
             </SelectContent>
           </Select>
-        </div>
-        <div>
-          <Label htmlFor="department">Department</Label>
-          <Input
-            id="department"
-            value={formData.department}
-            onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-            placeholder="e.g., Computer Science"
-          />
         </div>
       </div>
 
@@ -345,7 +333,6 @@ export default function AdminUsers() {
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Role</TableHead>
-                <TableHead>Department</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -353,15 +340,16 @@ export default function AdminUsers() {
             <TableBody>
               {filteredUsers.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.usn}</TableCell>
-                  <TableCell>{user.name}</TableCell>
+                  <TableCell className="font-medium">
+                    {user.role === 'STUDENT' ? user.usn : '-'}
+                  </TableCell>
+                  <TableCell>{user.fullName}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>
                     <Badge variant={user.role === 'ADMIN' ? 'default' : user.role === 'INSTRUCTOR' ? 'secondary' : 'outline'}>
                       {user.role}
                     </Badge>
                   </TableCell>
-                  <TableCell>{user.department || '-'}</TableCell>
                   <TableCell>
                     <Badge variant={user.isActive ? 'default' : 'destructive'}>
                       {user.isActive ? 'Active' : 'Inactive'}
