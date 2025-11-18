@@ -46,14 +46,19 @@ export default function InstructorCourseMaterials() {
     
     try {
       const response = await courseAPI.getInstructorCourses(user.id);
-      setCourses(response.data);
-      if (response.data.length > 0) {
-        setSelectedCourse(response.data[0].id);
+      const courseList = response.data.map((c: { id: number; courseName: string; courseCode: string }) => ({
+        id: c.id,
+        name: c.courseName,
+        code: c.courseCode
+      }));
+      setCourses(courseList);
+      if (courseList.length > 0 && !selectedCourse) {
+        setSelectedCourse(courseList[0].id);
       }
     } catch (error) {
       toast.error("Failed to load courses");
     }
-  }, [user]);
+  }, [user, selectedCourse]);
 
   const fetchMaterials = useCallback(async () => {
     if (!selectedCourse) return;

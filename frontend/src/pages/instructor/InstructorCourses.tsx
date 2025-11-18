@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from 'react';
-import { Plus, Search, Eye, Edit, Trash2, Users } from 'lucide-react';
+import { Plus, Search, Trash2, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -11,6 +11,14 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
@@ -23,14 +31,26 @@ interface CourseWithDetails extends Course {
   enrollmentCount: number;
 }
 
+interface Enrollment {
+  id: number;
+  student: {
+    id: number;
+    name: string;
+    usn: string;
+    email: string;
+  };
+  enrolledAt: string;
+}
+
 export default function InstructorCourses() {
   const [courses, setCourses] = useState<CourseWithDetails[]>([]);
   const [filteredCourses, setFilteredCourses] = useState<CourseWithDetails[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isEnrolledStudentsModalOpen, setIsEnrolledStudentsModalOpen] = useState(false);
   const [isBulkEnrollModalOpen, setIsBulkEnrollModalOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<CourseWithDetails | null>(null);
+  const [enrolledStudents, setEnrolledStudents] = useState<Enrollment[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuthStore();
 
@@ -133,6 +153,23 @@ export default function InstructorCourses() {
     }
   };
 
+  const fetchEnrolledStudents = async (courseId: number) => {
+    try {
+      const response = await enrollmentAPI.getCourseEnrollments(courseId);
+      setEnrolledStudents(response.data);
+    } catch (error: unknown) {
+      toast.error('Failed to fetch enrolled students', {
+        description: (error as any).response?.data?.message || 'An error occurred',
+      });
+    }
+  };
+
+  const handleViewEnrolledStudents = async (course: CourseWithDetails) => {
+    setSelectedCourse(course);
+    await fetchEnrolledStudents(course.id);
+    setIsEnrolledStudentsModalOpen(true);
+  };
+
   const resetForm = () => {
     setFormData({
       courseName: '',
@@ -178,41 +215,52 @@ export default function InstructorCourses() {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredCourses.map((course) => (
-          <Card key={course.id}>
-            <CardHeader>
-              <CardTitle className="text-xl">{course.courseName}</CardTitle>
-              <CardDescription>{course.courseCode}</CardDescription>
+          <Card key={course.id} className="flex flex-col">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">{course.courseName}</CardTitle>
+              <CardDescription className="text-sm">{course.courseCode}</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+            <CardContent className="flex-1">
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <p className="text-sm text-muted-foreground">Credits</p>
+                    <p className="text-xs text-muted-foreground">Credits</p>
                     <p className="font-medium">{course.credits}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Students</p>
+                    <p className="text-xs text-muted-foreground">Students</p>
                     <p className="font-medium">{course.enrollmentCount} / {course.maxStudents}</p>
                   </div>
                 </div>
-                <div className="flex gap-2 pt-4">
+                <div className="flex flex-col gap-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex-1"
-                    onClick={() => {
-                      setSelectedCourse(course);
-                      setIsBulkEnrollModalOpen(true);
-                    }}
+                    className="w-full"
+                    onClick={() => handleViewEnrolledStudents(course)}
                   >
                     <Users className="w-4 h-4 mr-1" />
-                    Enroll
+                    View Students
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleDeleteCourse(course)}>
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => {
+                        setSelectedCourse(course);
+                        setIsBulkEnrollModalOpen(true);
+                      }}
+                    >
+                      <Users className="w-4 h-4 mr-1" />
+                      Enroll
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => handleDeleteCourse(course)}>
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -289,6 +337,56 @@ export default function InstructorCourses() {
             </Button>
             <Button onClick={handleCreateCourse}>Create Course</Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Enrolled Students Modal */}
+      <Dialog open={isEnrolledStudentsModalOpen} onOpenChange={setIsEnrolledStudentsModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>
+              Enrolled Students - {selectedCourse?.courseName}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            {enrolledStudents.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No students enrolled yet
+              </div>
+            ) : (
+              <div className="border rounded-md max-h-[500px] overflow-auto">
+                <Table>
+                  <TableHeader className="sticky top-0 bg-background z-10">
+                    <TableRow>
+                      <TableHead>USN</TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Enrollment Date</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {enrolledStudents.map((enrollment) => (
+                      <TableRow key={enrollment.id}>
+                        <TableCell className="font-medium">{enrollment.student.usn}</TableCell>
+                        <TableCell>{enrollment.student.name || 'N/A'}</TableCell>
+                        <TableCell>{enrollment.student.email}</TableCell>
+                        <TableCell>
+                          {enrollment.enrolledAt 
+                            ? new Date(enrollment.enrolledAt).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                              })
+                            : 'N/A'
+                          }
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
 

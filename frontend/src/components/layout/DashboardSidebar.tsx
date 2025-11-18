@@ -13,7 +13,6 @@ import {
   BarChart3,
   Settings,
   FileBarChart,
-  MessageSquare,
   BookMarked,
   Award,
   HelpCircle,
@@ -136,25 +135,11 @@ const menuItems: MenuItem[] = [
     roles: ['INSTRUCTOR'],
     section: 'Academic',
   },
-  {
-    title: 'Gradebook',
-    url: '/instructor/gradebook',
-    icon: Award,
-    roles: ['INSTRUCTOR'],
-    section: 'Academic',
-  },
   // Instructor - Resources
   {
     title: 'Course Materials',
     url: '/instructor/materials',
     icon: BookMarked,
-    roles: ['INSTRUCTOR'],
-    section: 'Resources',
-  },
-  {
-    title: 'Messages',
-    url: '/instructor/messages',
-    icon: MessageSquare,
     roles: ['INSTRUCTOR'],
     section: 'Resources',
   },
@@ -202,28 +187,6 @@ const menuItems: MenuItem[] = [
     icon: Calendar,
     roles: ['STUDENT'],
     section: 'Academic',
-  },
-  // Student - Resources
-  {
-    title: 'Messages',
-    url: '/student/messages',
-    icon: MessageSquare,
-    roles: ['STUDENT'],
-    section: 'Resources',
-  },
-  {
-    title: 'Profile',
-    url: '/student/profile',
-    icon: Users,
-    roles: ['STUDENT'],
-    section: 'Resources',
-  },
-  {
-    title: 'Help & Support',
-    url: '/student/help',
-    icon: HelpCircle,
-    roles: ['STUDENT'],
-    section: 'Resources',
   },
 ];
 

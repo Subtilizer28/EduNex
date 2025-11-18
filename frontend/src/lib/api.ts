@@ -114,32 +114,17 @@ export const enrollmentAPI = {
 export const assignmentAPI = {
   getInstructorAssignments: (instructorId: number) => api.get(`/assignments/instructor/${instructorId}`),
   getStudentAssignments: (studentId: number) => api.get(`/assignments/student/${studentId}`),
-  createAssignment: (assignmentData: any) => api.post('/assignments', assignmentData),
+  createAssignment: (assignmentData: any, courseId: number) => 
+    api.post('/assignments', assignmentData, { params: { courseId } }),
   updateAssignment: (id: number, assignmentData: any) => api.put(`/assignments/${id}`, assignmentData),
   deleteAssignment: (id: number) => api.delete(`/assignments/${id}`),
-  getSubmissions: (assignmentId: number) => api.get(`/assignments/${assignmentId}/submissions`),
+  getSubmissions: (courseId: number, title: string) => api.get(`/assignments/course/${courseId}/submissions`, { params: { title } }),
   submitAssignment: (assignmentId: number, formData: FormData) =>
     api.post(`/assignments/${assignmentId}/submit`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     }),
-  gradeSubmission: (submissionId: number, data: { marks: number; feedback?: string }) =>
-    api.put(`/assignments/submissions/${submissionId}/grade`, data),
-};
-
-// Quiz API
-export const quizAPI = {
-  getInstructorQuizzes: (instructorId: number) => api.get(`/quizzes/instructor/${instructorId}`),
-  getStudentQuizzes: (studentId: number) => api.get(`/quizzes/student/${studentId}`),
-  createQuiz: (quizData: any, courseId: number) => api.post(`/quizzes?courseId=${courseId}`, quizData),
-  updateQuiz: (id: number, quizData: any) => api.put(`/quizzes/${id}`, quizData),
-  deleteQuiz: (id: number) => api.delete(`/quizzes/${id}`),
-  getQuizById: (id: number) => api.get(`/quizzes/${id}`),
-  getQuizQuestions: (quizId: number) => api.get(`/quizzes/${quizId}/questions`),
-  addQuestion: (quizId: number, questionData: any) => api.post(`/quizzes/${quizId}/questions`, questionData),
-  startQuizAttempt: (quizId: number, studentId: number) => api.post(`/quizzes/${quizId}/start?studentId=${studentId}`),
-  submitQuizAttempt: (attemptId: number, answers: any) => api.post(`/quizzes/attempts/${attemptId}/submit`, answers),
-  getQuizResults: (quizId: number) => api.get(`/quizzes/${quizId}/results`),
-  getMyAttempts: (quizId: number) => api.get(`/quizzes/${quizId}/my-attempts`),
+  gradeSubmission: (assignmentId: number, grade: number, feedback: string) =>
+    api.post(`/assignments/${assignmentId}/grade`, null, { params: { grade, feedback } }),
 };
 
 // Attendance API
@@ -159,6 +144,7 @@ export const attendanceAPI = {
 
 // Course Materials API
 export const courseMaterialAPI = {
+  getCourseMaterials: (courseId: number) => api.get(`/materials/course/${courseId}`),
   createMaterial: (materialData: any, courseId: number) => 
     api.post(`/materials?courseId=${courseId}`, materialData),
   getMaterialsByCourse: (courseId: number) => api.get(`/materials/course/${courseId}`),
@@ -169,3 +155,4 @@ export const courseMaterialAPI = {
 };
 
 export default api;
+

@@ -35,7 +35,7 @@ interface AttendanceSession {
 
 export default function InstructorAttendance() {
   const { user } = useAuthStore();
-  const [courses, setCourses] = useState<{ id: number; name: string; code: string }[]>([]);
+  const [courses, setCourses] = useState<{ id: number; courseName: string; courseCode: string }[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<number>(0);
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
   const [attendanceSessions, setAttendanceSessions] = useState<AttendanceSession[]>([]);
@@ -61,9 +61,9 @@ export default function InstructorAttendance() {
       const response = await enrollmentAPI.getCourseEnrollments(selectedCourse);
       const enrollments = response.data;
       
-      const records = enrollments.map((enrollment: { student: { id: number; name: string } }) => ({
+      const records = enrollments.map((enrollment: { student: { id: number; fullName: string } }) => ({
         studentId: enrollment.student.id,
-        studentName: enrollment.student.name,
+        studentName: enrollment.student.fullName,
         status: "PRESENT" as const,
         remarks: ""
       }));
@@ -83,14 +83,17 @@ export default function InstructorAttendance() {
       const sessions = response.data;
       
       const sessionMap = new Map<string, AttendanceSession>();
-      sessions.forEach((record: { id: number; date: string; course: { id: number; name: string }; status: string }) => {
-        const date = record.date;
+      sessions.forEach((record: { id: number; attendanceDate: string; course: { id: number; courseName: string }; status: string }) => {
+        const date = record.attendanceDate;
+        // Skip records with invalid dates
+        if (!date) return;
+        
         if (!sessionMap.has(date)) {
           sessionMap.set(date, {
             id: record.id,
             date: date,
             courseId: record.course.id,
-            courseName: record.course.name,
+            courseName: record.course.courseName,
             totalStudents: 0,
             present: 0,
             absent: 0,
@@ -104,7 +107,10 @@ export default function InstructorAttendance() {
         else if (record.status === "LATE") session.late++;
       });
       
-      setAttendanceSessions(Array.from(sessionMap.values()));
+      // Convert to array and sort by date descending (most recent first)
+      const sessionsArray = Array.from(sessionMap.values());
+      sessionsArray.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      setAttendanceSessions(sessionsArray);
     } catch (error) {
       toast.error("Failed to load attendance sessions");
     }
@@ -113,9 +119,14 @@ export default function InstructorAttendance() {
   useEffect(() => {
     if (user) {
       fetchCourses();
+    }
+  }, [user, fetchCourses]);
+
+  useEffect(() => {
+    if (selectedCourse > 0) {
       fetchAttendanceSessions();
     }
-  }, [user, fetchCourses, fetchAttendanceSessions]);
+  }, [selectedCourse, fetchAttendanceSessions]);
 
   useEffect(() => {
     if (selectedCourse && isMarkingOpen) {
@@ -147,16 +158,21 @@ export default function InstructorAttendance() {
   };
 
   const handleSaveAttendance = async () => {
+    if (!user) return;
+    
     try {
-      const attendanceData = attendanceRecords.map(record => ({
+      const attendanceList = attendanceRecords.map(record => ({
         studentId: record.studentId,
-        courseId: selectedCourse,
-        date: format(selectedDate, "yyyy-MM-dd"),
         status: record.status,
-        remarks: record.remarks
+        remarks: record.remarks,
+        date: format(selectedDate, "yyyy-MM-dd")
       }));
 
-      await attendanceAPI.markMultipleAttendance(attendanceData);
+      await attendanceAPI.markMultipleAttendance({
+        courseId: selectedCourse,
+        markedById: user.id,
+        attendanceList
+      });
       
       toast.success("Attendance saved successfully");
       setIsMarkingOpen(false);
@@ -167,7 +183,40 @@ export default function InstructorAttendance() {
   };
 
   const handleExportAttendance = () => {
-    toast.success("Exporting attendance data...");
+    if (attendanceSessions.length === 0) {
+      toast.error("No attendance data to export");
+      return;
+    }
+
+    // Create CSV content
+    const headers = ["Date", "Course", "Total Students", "Present", "Absent", "Late", "Attendance %"];
+    const rows = attendanceSessions.map(session => [
+      session.date,
+      session.courseName,
+      session.totalStudents.toString(),
+      session.present.toString(),
+      session.absent.toString(),
+      session.late.toString(),
+      `${((session.present + session.late) / session.totalStudents * 100).toFixed(1)}%`
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row => row.join(","))
+    ].join("\n");
+
+    // Create and download file
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `attendance_${format(new Date(), "yyyy-MM-dd")}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast.success("Attendance data exported successfully");
   };
 
   const getAttendanceStats = () => {
@@ -226,14 +275,17 @@ export default function InstructorAttendance() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label>Course</Label>
-                    <Select value={selectedCourse.toString()} onValueChange={(value) => setSelectedCourse(parseInt(value))}>
+                    <Select 
+                      value={selectedCourse > 0 ? selectedCourse.toString() : ""} 
+                      onValueChange={(value) => setSelectedCourse(parseInt(value))}
+                    >
                       <SelectTrigger>
-                        <SelectValue />
+                        <SelectValue placeholder="Select a course" />
                       </SelectTrigger>
                       <SelectContent>
                         {courses.map((course) => (
                           <SelectItem key={course.id} value={course.id.toString()}>
-                            {course.code} - {course.name}
+                            {course.courseCode} - {course.courseName}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -350,17 +402,19 @@ export default function InstructorAttendance() {
 
       <div className="mb-6">
         <Label>Select Course</Label>
-        <Select value={selectedCourse.toString()} onValueChange={(value) => {
-          setSelectedCourse(parseInt(value));
-          fetchAttendanceSessions();
-        }}>
+        <Select 
+          value={selectedCourse > 0 ? selectedCourse.toString() : ""} 
+          onValueChange={(value) => {
+            setSelectedCourse(parseInt(value));
+          }}
+        >
           <SelectTrigger className="w-full max-w-md">
-            <SelectValue />
+            <SelectValue placeholder="Select a course" />
           </SelectTrigger>
           <SelectContent>
             {courses.map((course) => (
               <SelectItem key={course.id} value={course.id.toString()}>
-                {course.code} - {course.name}
+                {course.courseCode} - {course.courseName}
               </SelectItem>
             ))}
           </SelectContent>
@@ -380,40 +434,42 @@ export default function InstructorAttendance() {
               <p className="text-sm">Start by marking attendance for a class</p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Course</TableHead>
-                  <TableHead>Total Students</TableHead>
-                  <TableHead>Present</TableHead>
-                  <TableHead>Absent</TableHead>
-                  <TableHead>Late</TableHead>
-                  <TableHead>Attendance %</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {attendanceSessions.map((session) => (
-                  <TableRow key={session.id}>
-                    <TableCell>{format(new Date(session.date), "PPP")}</TableCell>
-                    <TableCell>{session.courseName}</TableCell>
-                    <TableCell>{session.totalStudents}</TableCell>
-                    <TableCell>
-                      <Badge className="bg-green-500">{session.present}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className="bg-red-500">{session.absent}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className="bg-yellow-500">{session.late}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      {((session.present + session.late) / session.totalStudents * 100).toFixed(1)}%
-                    </TableCell>
+            <div className="border rounded-lg overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <TableHead className="font-semibold">Date</TableHead>
+                    <TableHead className="font-semibold">Course</TableHead>
+                    <TableHead className="font-semibold text-center">Total</TableHead>
+                    <TableHead className="font-semibold text-center">Present</TableHead>
+                    <TableHead className="font-semibold text-center">Absent</TableHead>
+                    <TableHead className="font-semibold text-center">Late</TableHead>
+                    <TableHead className="font-semibold text-center">Attendance %</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {attendanceSessions.map((session) => (
+                    <TableRow key={session.id} className="hover:bg-muted/30">
+                      <TableCell className="font-medium">{format(new Date(session.date), "PPP")}</TableCell>
+                      <TableCell>{session.courseName}</TableCell>
+                      <TableCell className="text-center">{session.totalStudents}</TableCell>
+                      <TableCell className="text-center">
+                        <Badge className="bg-green-500">{session.present}</Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge className="bg-red-500">{session.absent}</Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge className="bg-yellow-500">{session.late}</Badge>
+                      </TableCell>
+                      <TableCell className="text-center font-semibold">
+                        {((session.present + session.late) / session.totalStudents * 100).toFixed(1)}%
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>

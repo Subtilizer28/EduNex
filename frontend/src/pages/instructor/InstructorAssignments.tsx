@@ -60,7 +60,7 @@ export default function InstructorAssignments() {
     description: '',
     courseId: 0,
     dueDate: '',
-    totalMarks: 100,
+    maxMarks: 100,
   });
 
   const [gradeData, setGradeData] = useState({
@@ -100,8 +100,19 @@ export default function InstructorAssignments() {
 
   const fetchSubmissions = async (assignmentId: number) => {
     try {
-      const response = await assignmentAPI.getSubmissions(assignmentId);
-      setSubmissions(response.data);
+      const assignment = assignments.find(a => a.id === assignmentId);
+      if (!assignment) return;
+      const response = await assignmentAPI.getSubmissions(assignment.course.id, assignment.title);
+      // Map backend Assignment objects to frontend Submission format
+      const mappedSubmissions = response.data.map((assignment: any) => ({
+        id: assignment.id,
+        studentName: assignment.student?.fullName || 'Unknown',
+        studentUsn: assignment.student?.usn || 'N/A',
+        submittedAt: assignment.submittedAt || new Date().toISOString(),
+        grade: assignment.marksObtained,
+        feedback: assignment.feedback,
+      }));
+      setSubmissions(mappedSubmissions);
     } catch (error) {
       toast.error('Failed to fetch submissions');
     }
@@ -109,7 +120,7 @@ export default function InstructorAssignments() {
 
   const handleCreateAssignment = async () => {
     try {
-      await assignmentAPI.createAssignment(formData);
+      await assignmentAPI.createAssignment(formData, formData.courseId);
       toast.success('Assignment created successfully');
       setIsCreateModalOpen(false);
       resetForm();
@@ -154,7 +165,7 @@ export default function InstructorAssignments() {
     if (!selectedSubmission) return;
 
     try {
-      await assignmentAPI.gradeSubmission(selectedSubmission.id, gradeData);
+      await assignmentAPI.gradeSubmission(selectedSubmission.id, gradeData.marks, gradeData.feedback);
       toast.success('Grade submitted successfully');
       setIsGradeModalOpen(false);
       if (selectedAssignment) {
@@ -173,7 +184,7 @@ export default function InstructorAssignments() {
       description: '',
       courseId: 0,
       dueDate: '',
-      totalMarks: 100,
+      maxMarks: 100,
     });
   };
 
@@ -221,7 +232,7 @@ export default function InstructorAssignments() {
                   <TableCell className="font-medium">{assignment.title}</TableCell>
                   <TableCell>{assignment.course.courseName}</TableCell>
                   <TableCell>{new Date(assignment.dueDate).toLocaleDateString()}</TableCell>
-                  <TableCell>{assignment.totalMarks}</TableCell>
+                  <TableCell>{assignment.maxMarks}</TableCell>
                   <TableCell>
                     {isOverdue(assignment.dueDate) ? (
                       <Badge variant="destructive">Overdue</Badge>
@@ -304,12 +315,12 @@ export default function InstructorAssignments() {
               </div>
 
               <div>
-                <Label htmlFor="totalMarks">Total Marks</Label>
+                <Label htmlFor="maxMarks">Total Marks</Label>
                 <Input
-                  id="totalMarks"
+                  id="maxMarks"
                   type="number"
-                  value={formData.totalMarks}
-                  onChange={(e) => setFormData({ ...formData, totalMarks: parseInt(e.target.value) })}
+                  value={formData.maxMarks}
+                  onChange={(e) => setFormData({ ...formData, maxMarks: parseInt(e.target.value) })}
                   min={1}
                 />
               </div>
@@ -358,7 +369,7 @@ export default function InstructorAssignments() {
                   <TableCell>{new Date(submission.submittedAt).toLocaleString()}</TableCell>
                   <TableCell>
                     {submission.grade !== undefined ? (
-                      <Badge variant="default">{submission.grade}/{selectedAssignment?.totalMarks}</Badge>
+                      <Badge variant="default">{submission.grade}/{selectedAssignment?.maxMarks}</Badge>
                     ) : (
                       <Badge variant="outline">Not Graded</Badge>
                     )}
@@ -368,9 +379,10 @@ export default function InstructorAssignments() {
                       variant="outline"
                       size="sm"
                       onClick={() => handleGradeSubmission(submission)}
+                      className={submission.grade !== undefined ? 'bg-green-600 hover:bg-green-700 text-white' : ''}
                     >
                       <CheckCircle className="w-4 h-4 mr-1" />
-                      Grade
+                      {submission.grade !== undefined ? 'Graded' : 'Grade'}
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -391,14 +403,14 @@ export default function InstructorAssignments() {
               <Label>Student: {selectedSubmission?.studentName} ({selectedSubmission?.studentUsn})</Label>
             </div>
             <div>
-              <Label htmlFor="marks">Grade (out of {selectedAssignment?.totalMarks})</Label>
+              <Label htmlFor="marks">Grade (out of {selectedAssignment?.maxMarks})</Label>
               <Input
                 id="marks"
                 type="number"
                 value={gradeData.marks}
                 onChange={(e) => setGradeData({ ...gradeData, marks: parseInt(e.target.value) })}
                 min={0}
-                max={selectedAssignment?.totalMarks || 100}
+                max={selectedAssignment?.maxMarks || 100}
               />
             </div>
             <div>

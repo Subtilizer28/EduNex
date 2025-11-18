@@ -40,7 +40,7 @@ interface Quiz {
 export default function InstructorQuizzes() {
   const { user } = useAuthStore();
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
-  const [courses, setCourses] = useState<{ id: number; name: string; code?: string }[]>([]);
+  const [courses, setCourses] = useState<{ id: number; courseName: string; courseCode: string }[]>([]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
@@ -175,7 +175,11 @@ export default function InstructorQuizzes() {
 
   const openEditDialog = (quiz: Quiz) => {
     setSelectedQuiz(quiz);
-    setFormData(quiz);
+    setFormData({
+      ...quiz,
+      courseId: quiz.courseId || 0,
+      questions: quiz.questions || []
+    });
     setIsEditOpen(true);
   };
 
@@ -240,7 +244,7 @@ export default function InstructorQuizzes() {
         <div>
           <Label htmlFor="course">Course *</Label>
           <Select
-            value={formData.courseId.toString()}
+            value={formData.courseId > 0 ? formData.courseId.toString() : ""}
             onValueChange={(value) => setFormData({ ...formData, courseId: parseInt(value) })}
           >
             <SelectTrigger>
@@ -249,7 +253,7 @@ export default function InstructorQuizzes() {
             <SelectContent>
               {courses.map((course) => (
                 <SelectItem key={course.id} value={course.id.toString()}>
-                  {course.code} - {course.name}
+                  {course.courseCode} - {course.courseName}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -313,7 +317,7 @@ export default function InstructorQuizzes() {
           </Card>
         ))}
 
-        <Card className="bg-gray-50">
+        <Card className="bg-gray-900 dark:bg-gray-800">
           <CardHeader>
             <CardTitle className="text-base">Add New Question</CardTitle>
           </CardHeader>

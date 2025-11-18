@@ -6,15 +6,16 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/authStore';
-import { enrollmentAPI } from '@/lib/api';
+import { enrollmentAPI, courseMaterialAPI } from '@/lib/api';
+import type { Course, User } from '@/types';
 
 interface Enrollment {
   id: number;
-  courseId: number;
-  courseName: string;
-  courseCode: string;
-  credits: number;
-  instructorName: string;
+  student: User;
+  course: Course;
+  status: string;
+  progressPercentage: number;
+  finalGrade?: number | null;
   enrolledAt: string;
 }
 
@@ -23,7 +24,9 @@ interface CourseMaterial {
   title: string;
   description?: string;
   type: "DOCUMENT" | "VIDEO" | "LINK" | "OTHER";
-  url: string;
+  fileUrl: string;
+  uploadedBy?: User;
+  uploadedAt?: string;
 }
 
 export default function StudentCourses() {
@@ -56,31 +59,8 @@ export default function StudentCourses() {
   const fetchCourseMaterials = async (courseId: number) => {
     try {
       setLoadingMaterials(true);
-      // TODO: Replace with actual API call
-      const mockMaterials: CourseMaterial[] = [
-        {
-          id: 1,
-          title: "Introduction to Arrays and Linked Lists",
-          description: "Comprehensive guide covering array operations and linked list implementations",
-          type: "DOCUMENT",
-          url: "https://example.com/materials/arrays-linkedlists.pdf"
-        },
-        {
-          id: 2,
-          title: "Sorting Algorithms Explained",
-          description: "Video tutorial on bubble sort, merge sort, and quick sort with animations",
-          type: "VIDEO",
-          url: "https://youtube.com/watch?v=example"
-        },
-        {
-          id: 3,
-          title: "Binary Trees Tutorial",
-          description: "Interactive tutorial on binary tree traversal algorithms",
-          type: "LINK",
-          url: "https://visualgo.net/en/bst"
-        }
-      ];
-      setCourseMaterials(mockMaterials);
+      const response = await courseMaterialAPI.getCourseMaterials(courseId);
+      setCourseMaterials(response.data);
     } catch (error) {
       toast.error('Failed to fetch course materials');
     } finally {
@@ -90,7 +70,7 @@ export default function StudentCourses() {
 
   const handleViewMaterials = (enrollment: Enrollment) => {
     setSelectedCourse(enrollment);
-    fetchCourseMaterials(enrollment.courseId);
+    fetchCourseMaterials(enrollment.course.id);
   };
 
   const getTypeIcon = (type: string) => {
@@ -150,21 +130,21 @@ export default function StudentCourses() {
         {enrollments.map((enrollment) => (
           <Card key={enrollment.id} className="hover:shadow-lg transition-shadow">
             <CardHeader>
-              <CardTitle className="text-xl">{enrollment.courseName}</CardTitle>
-              <CardDescription>{enrollment.courseCode}</CardDescription>
+              <CardTitle className="text-xl">{enrollment.course.courseName}</CardTitle>
+              <CardDescription>{enrollment.course.courseCode}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-center gap-2 text-sm">
                   <Users className="w-4 h-4 text-muted-foreground" />
                   <span className="text-muted-foreground">Instructor:</span>
-                  <span className="font-medium">{enrollment.instructorName}</span>
+                  <span className="font-medium">{enrollment.course.instructor?.fullName || 'N/A'}</span>
                 </div>
                 
                 <div className="flex items-center gap-2 text-sm">
                   <BookOpen className="w-4 h-4 text-muted-foreground" />
                   <span className="text-muted-foreground">Credits:</span>
-                  <span className="font-medium">{enrollment.credits}</span>
+                  <span className="font-medium">{enrollment.course.credits}</span>
                 </div>
 
                 <div className="flex items-center gap-2 text-sm">
@@ -189,7 +169,7 @@ export default function StudentCourses() {
                     </DialogTrigger>
                     <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
                       <DialogHeader>
-                        <DialogTitle>{selectedCourse?.courseName} - Materials</DialogTitle>
+                        <DialogTitle>{selectedCourse?.course.courseName} - Materials</DialogTitle>
                         <DialogDescription>
                           Course resources and learning materials
                         </DialogDescription>
@@ -207,7 +187,7 @@ export default function StudentCourses() {
                       ) : (
                         <div className="space-y-3">
                           {courseMaterials.map((material) => (
-                            <Card key={material.id} className="hover:bg-gray-50">
+                            <Card key={material.id}>
                               <CardContent className="p-4">
                                 <div className="flex items-start gap-4">
                                   <div className="flex-shrink-0 mt-1">
@@ -227,7 +207,14 @@ export default function StudentCourses() {
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={() => window.open(material.url, "_blank")}
+                                    onClick={() => {
+                                      if (material.fileUrl) {
+                                        window.open(material.fileUrl, "_blank");
+                                      } else {
+                                        toast.error("No link available");
+                                      }
+                                    }}
+                                    disabled={!material.fileUrl}
                                   >
                                     <ExternalLink className="h-4 w-4" />
                                   </Button>

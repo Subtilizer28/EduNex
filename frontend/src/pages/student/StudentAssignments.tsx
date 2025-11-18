@@ -95,10 +95,10 @@ export default function StudentAssignments() {
   };
 
   const getAssignmentStatus = (assignment: AssignmentWithSubmission) => {
-    if (assignment.grade !== undefined) {
+    if (assignment.marksObtained !== null && assignment.marksObtained !== undefined) {
       return { label: 'Graded', variant: 'default' as const, icon: CheckCircle };
     }
-    if (assignment.submitted) {
+    if (assignment.status === 'SUBMITTED' || assignment.status === 'LATE_SUBMISSION') {
       return { label: 'Submitted', variant: 'secondary' as const, icon: CheckCircle };
     }
     if (new Date(assignment.dueDate) < new Date()) {
@@ -166,15 +166,15 @@ export default function StudentAssignments() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {assignment.grade !== undefined ? (
-                        <span className="font-medium">{assignment.grade}/{assignment.totalMarks}</span>
+                      {assignment.marksObtained !== null && assignment.marksObtained !== undefined ? (
+                        <span className="font-medium">{assignment.marksObtained}/{assignment.maxMarks}</span>
                       ) : (
                         <span className="text-muted-foreground">-</span>
                       )}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        {!assignment.submitted && (
+                        {assignment.status !== 'SUBMITTED' && assignment.status !== 'LATE_SUBMISSION' && assignment.status !== 'GRADED' && (
                           <Button
                             variant="default"
                             size="sm"
@@ -185,7 +185,7 @@ export default function StudentAssignments() {
                             Submit
                           </Button>
                         )}
-                        {assignment.grade !== undefined && (
+                        {assignment.marksObtained !== null && assignment.marksObtained !== undefined && (
                           <Button
                             variant="outline"
                             size="sm"
@@ -216,7 +216,7 @@ export default function StudentAssignments() {
               <div className="mb-4 p-4 bg-muted rounded-lg">
                 <p className="text-sm font-medium">Course: {selectedAssignment?.courseName || selectedAssignment?.course.courseName}</p>
                 <p className="text-sm text-muted-foreground">Due: {selectedAssignment && new Date(selectedAssignment.dueDate).toLocaleString()}</p>
-                <p className="text-sm text-muted-foreground">Total Marks: {selectedAssignment?.totalMarks}</p>
+                <p className="text-sm text-muted-foreground">Max Marks: {selectedAssignment?.maxMarks}</p>
               </div>
             </div>
 
@@ -265,7 +265,7 @@ export default function StudentAssignments() {
             <div>
               <Label>Grade</Label>
               <p className="text-2xl font-bold">
-                {selectedAssignment?.grade}/{selectedAssignment?.totalMarks}
+                {selectedAssignment?.marksObtained}
               </p>
             </div>
 

@@ -2,10 +2,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { StatCard } from '@/components/StatCard';
 import { BookOpen, FileText, ClipboardList, Calendar } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/authStore';
 import { enrollmentAPI, assignmentAPI, attendanceAPI } from '@/lib/api';
@@ -129,13 +128,6 @@ const StudentDashboard = () => {
                     >
                       View
                     </Button>
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-muted-foreground">Progress</span>
-                      <span className="font-medium">{enrollment.progress || 0}%</span>
-                    </div>
-                    <Progress value={enrollment.progress || 0} className="h-2" />
                   </div>
                 </div>
               ))}

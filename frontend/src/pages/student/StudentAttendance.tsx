@@ -43,44 +43,32 @@ export default function StudentAttendance() {
     try {
       setLoading(true);
       const response = await attendanceAPI.getMyAttendance();
-      const records: AttendanceRecord[] = response.data.map((record: any) => ({
+      
+      // Parse the actual API structure: {courseAttendance: {}, attendance: []}
+      const attendanceArray = response.data.attendance || [];
+      const courseAttendanceData = response.data.courseAttendance || {};
+      
+      const records: AttendanceRecord[] = attendanceArray.map((record: any) => ({
         id: record.id,
         courseId: record.course.id,
-        courseName: record.course.name,
-        courseCode: record.course.code,
-        date: record.date,
+        courseName: record.course.courseName,
+        courseCode: record.course.courseCode,
+        date: record.attendanceDate,
         status: record.status,
         remarks: record.remarks
       }));
       setAttendanceRecords(records);
 
-      const courseMap = new Map<number, CourseAttendance>();
-      
-      records.forEach(record => {
-        if (!courseMap.has(record.courseId)) {
-          courseMap.set(record.courseId, {
-            courseId: record.courseId,
-            courseName: record.courseName,
-            courseCode: record.courseCode,
-            totalClasses: 0,
-            attended: 0,
-            absent: 0,
-            late: 0,
-            percentage: 0
-          });
-        }
-        
-        const course = courseMap.get(record.courseId)!;
-        course.totalClasses++;
-        
-        if (record.status === "PRESENT") course.attended++;
-        else if (record.status === "ABSENT") course.absent++;
-        else if (record.status === "LATE") course.late++;
-      });
-
-      const courseStats = Array.from(courseMap.values()).map(course => ({
-        ...course,
-        percentage: ((course.attended + course.late) / course.totalClasses * 100)
+      // Convert courseAttendance object to array
+      const courseStats: CourseAttendance[] = Object.entries(courseAttendanceData).map(([courseId, data]: [string, any]) => ({
+        courseId: parseInt(courseId),
+        courseName: data.courseName,
+        courseCode: data.courseCode,
+        totalClasses: data.total,
+        attended: data.present,
+        absent: data.absent,
+        late: 0,
+        percentage: data.rate
       }));
 
       setCourseAttendance(courseStats);

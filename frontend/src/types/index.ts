@@ -29,10 +29,17 @@ export interface Assignment {
   title: string;
   description?: string;
   course: Course;
-  totalMarks: number;
+  maxMarks: number;
   dueDate: string;
   attachmentUrl?: string;
+  student?: User | null;
+  submissionUrl?: string | null;
+  submittedAt?: string | null;
+  marksObtained?: number | null;
+  feedback?: string | null;
+  status: 'PENDING' | 'SUBMITTED' | 'LATE_SUBMISSION' | 'GRADED';
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface Quiz {
