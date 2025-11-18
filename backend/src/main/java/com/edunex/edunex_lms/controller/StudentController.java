@@ -5,6 +5,7 @@ import com.edunex.edunex_lms.service.EnrollmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +19,7 @@ public class StudentController {
     
     @PostMapping
     @PreAuthorize("hasRole('STUDENT')")
+    @Transactional(readOnly = true)
     public ResponseEntity<Enrollment> enrollStudent(@RequestParam Long studentId, @RequestParam Long courseId) {
         Enrollment enrollment = enrollmentService.enrollStudent(studentId, courseId);
         return ResponseEntity.ok(enrollment);
@@ -32,6 +34,7 @@ public class StudentController {
     
     @GetMapping("/student/{studentId}")
     @PreAuthorize("hasRole('STUDENT')")
+    @Transactional(readOnly = true)
     public ResponseEntity<List<Enrollment>> getStudentEnrollments(@PathVariable Long studentId) {
         List<Enrollment> enrollments = enrollmentService.getStudentEnrollments(studentId);
         return ResponseEntity.ok(enrollments);
@@ -39,6 +42,7 @@ public class StudentController {
     
     @GetMapping("/course/{courseId}")
     @PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")
+    @Transactional(readOnly = true)
     public ResponseEntity<List<Enrollment>> getCourseEnrollments(@PathVariable Long courseId) {
         List<Enrollment> enrollments = enrollmentService.getCourseEnrollments(courseId);
         return ResponseEntity.ok(enrollments);
@@ -46,6 +50,7 @@ public class StudentController {
     
     @PutMapping("/{id}/progress")
     @PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")
+    @Transactional(readOnly = true)
     public ResponseEntity<Enrollment> updateProgress(@PathVariable Long id, @RequestParam Double progress) {
         Enrollment enrollment = enrollmentService.updateProgress(id, progress);
         return ResponseEntity.ok(enrollment);
@@ -53,6 +58,7 @@ public class StudentController {
     
     @PutMapping("/{id}/grade")
     @PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")
+    @Transactional(readOnly = true)
     public ResponseEntity<Enrollment> calculateFinalGrade(@PathVariable Long id, @RequestParam Double grade) {
         Enrollment enrollment = enrollmentService.calculateFinalGrade(id, grade);
         return ResponseEntity.ok(enrollment);
