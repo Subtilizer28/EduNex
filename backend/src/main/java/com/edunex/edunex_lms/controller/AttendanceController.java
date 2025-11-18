@@ -3,6 +3,7 @@ package com.edunex.edunex_lms.controller;
 import com.edunex.edunex_lms.entity.Attendance;
 import com.edunex.edunex_lms.entity.Enrollment;
 import com.edunex.edunex_lms.entity.User;
+import com.edunex.edunex_lms.exception.ResourceNotFoundException;
 import com.edunex.edunex_lms.repository.EnrollmentRepository;
 import com.edunex.edunex_lms.repository.UserRepository;
 import com.edunex.edunex_lms.service.AttendanceService;
@@ -31,41 +32,33 @@ public class AttendanceController {
     @PostMapping("/mark")
     @PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")
     public ResponseEntity<?> markAttendance(@RequestBody Map<String, Object> request) {
-        try {
-            Long studentId = Long.valueOf(request.get("studentId").toString());
-            Long courseId = Long.valueOf(request.get("courseId").toString());
-            String status = request.get("status").toString();
-            String remarks = request.get("remarks") != null ? request.get("remarks").toString() : null;
-            Long markedById = request.get("markedById") != null ? Long.valueOf(request.get("markedById").toString()) : null;
-            
-            Attendance attendance = attendanceService.markAttendance(studentId, courseId, status, remarks, markedById);
-            return ResponseEntity.ok(attendance);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
+        Long studentId = Long.valueOf(request.get("studentId").toString());
+        Long courseId = Long.valueOf(request.get("courseId").toString());
+        String status = request.get("status").toString();
+        String remarks = request.get("remarks") != null ? request.get("remarks").toString() : null;
+        Long markedById = request.get("markedById") != null ? Long.valueOf(request.get("markedById").toString()) : null;
+        
+        Attendance attendance = attendanceService.markAttendance(studentId, courseId, status, remarks, markedById);
+        return ResponseEntity.ok(attendance);
     }
     
     @PostMapping("/mark-multiple")
     @PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")
     public ResponseEntity<?> markMultipleAttendance(@RequestBody Map<String, Object> request) {
-        try {
-            Long courseId = Long.valueOf(request.get("courseId").toString());
-            Long markedById = Long.valueOf(request.get("markedById").toString());
-            @SuppressWarnings("unchecked")
-            List<Map<String, Object>> attendanceList = (List<Map<String, Object>>) request.get("attendanceList");
+        Long courseId = Long.valueOf(request.get("courseId").toString());
+        Long markedById = Long.valueOf(request.get("markedById").toString());
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> attendanceList = (List<Map<String, Object>>) request.get("attendanceList");
+        
+        for (Map<String, Object> item : attendanceList) {
+            Long studentId = Long.valueOf(item.get("studentId").toString());
+            String status = item.get("status").toString();
+            String remarks = item.get("remarks") != null ? item.get("remarks").toString() : null;
             
-            for (Map<String, Object> item : attendanceList) {
-                Long studentId = Long.valueOf(item.get("studentId").toString());
-                String status = item.get("status").toString();
-                String remarks = item.get("remarks") != null ? item.get("remarks").toString() : null;
-                
-                attendanceService.markAttendance(studentId, courseId, status, remarks, markedById);
-            }
-            
-            return ResponseEntity.ok(Map.of("message", "Attendance marked successfully"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            attendanceService.markAttendance(studentId, courseId, status, remarks, markedById);
         }
+        
+        return ResponseEntity.ok(Map.of("message", "Attendance marked successfully"));
     }
     
     @GetMapping("/student/{studentId}")
@@ -116,7 +109,7 @@ public class AttendanceController {
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<Map<String, Object>> getMyAttendance(@AuthenticationPrincipal UserDetails userDetails) {
         User user = userRepository.findByUsername(userDetails.getUsername())
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("User", "username", userDetails.getUsername()));
         
         List<Attendance> attendance = attendanceService.getAttendanceByStudent(user.getId());
         List<Enrollment> enrollments = enrollmentRepository.findByStudentId(user.getId());

@@ -1,6 +1,7 @@
 package com.edunex.edunex_lms.controller;
 
 import com.edunex.edunex_lms.entity.*;
+import com.edunex.edunex_lms.exception.ResourceNotFoundException;
 import com.edunex.edunex_lms.repository.UserRepository;
 import com.edunex.edunex_lms.service.QuizService;
 import lombok.RequiredArgsConstructor;
@@ -87,7 +88,7 @@ public class QuizController {
     @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR', 'ADMIN')")
     public ResponseEntity<List<Quiz>> getAvailableQuizzesForUser(@AuthenticationPrincipal UserDetails userDetails) {
         User user = userRepository.findByUsername(userDetails.getUsername())
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("User", "username", userDetails.getUsername()));
         List<Quiz> quizzes = quizService.getAvailableQuizzesForUser(user.getId());
         return ResponseEntity.ok(quizzes);
     }
@@ -98,7 +99,7 @@ public class QuizController {
             @PathVariable Long quizId,
             @AuthenticationPrincipal UserDetails userDetails) {
         User user = userRepository.findByUsername(userDetails.getUsername())
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("User", "username", userDetails.getUsername()));
         List<QuizAttempt> attempts = quizService.getUserAttempts(quizId, user.getId());
         return ResponseEntity.ok(attempts);
     }

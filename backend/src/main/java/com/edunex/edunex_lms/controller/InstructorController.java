@@ -58,17 +58,11 @@ public class InstructorController {
     public ResponseEntity<?> enrollStudent(
             @RequestParam Long studentId,
             @RequestParam Long courseId) {
-        try {
-            Enrollment enrollment = enrollmentService.enrollStudent(studentId, courseId);
-            return ResponseEntity.ok(Map.of(
-                "message", "Student enrolled successfully",
-                "enrollmentId", enrollment.getId()
-            ));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of(
-                "error", e.getMessage()
-            ));
-        }
+        Enrollment enrollment = enrollmentService.enrollStudent(studentId, courseId);
+        return ResponseEntity.ok(Map.of(
+            "message", "Student enrolled successfully",
+            "enrollmentId", enrollment.getId()
+        ));
     }
     
     @GetMapping("/enrollments/course/{courseId}")
