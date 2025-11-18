@@ -17,6 +17,10 @@ import Unauthorized from './pages/Unauthorized';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminCourses from './pages/admin/AdminCourses';
+import AdminAnalytics from './pages/admin/AdminAnalytics';
+import AdminReports from './pages/admin/AdminReports';
+import AdminSettings from './pages/admin/AdminSettings';
+import BulkOperations from './pages/admin/BulkOperations';
 import InstructorDashboard from './pages/instructor/InstructorDashboard';
 import InstructorCourses from './pages/instructor/InstructorCourses';
 import InstructorAssignments from './pages/instructor/InstructorAssignments';
@@ -79,8 +83,12 @@ const App = () => {
               }
             >
               <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="analytics" element={<AdminAnalytics />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="courses" element={<AdminCourses />} />
+              <Route path="bulk-operations" element={<BulkOperations />} />
+              <Route path="reports" element={<AdminReports />} />
+              <Route path="settings" element={<AdminSettings />} />
             </Route>
 
             {/* Instructor Routes */}

@@ -106,7 +106,7 @@ export const enrollmentAPI = {
   bulkEnroll: (data: { courseId: number; prefix: string; startRange: number; endRange: number }) =>
     api.post('/enrollments/bulk-enroll', data),
   getCourseEnrollments: (courseId: number) => api.get(`/enrollments/course/${courseId}`),
-  getStudentEnrollments: (studentId: number) => api.get(`/enrollments/student/${studentId}`),
+  getStudentEnrollments: (studentId: number) => api.get(`/student/student/${studentId}`),
   getMyEnrollments: () => api.get('/enrollments/my-enrollments'),
 };
 
