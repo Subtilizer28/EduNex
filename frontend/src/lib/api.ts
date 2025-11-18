@@ -130,18 +130,42 @@ export const assignmentAPI = {
 export const quizAPI = {
   getInstructorQuizzes: (instructorId: number) => api.get(`/quizzes/instructor/${instructorId}`),
   getStudentQuizzes: (studentId: number) => api.get(`/quizzes/student/${studentId}`),
-  createQuiz: (quizData: any) => api.post('/quizzes', quizData),
+  createQuiz: (quizData: any, courseId: number) => api.post(`/quizzes?courseId=${courseId}`, quizData),
+  updateQuiz: (id: number, quizData: any) => api.put(`/quizzes/${id}`, quizData),
+  deleteQuiz: (id: number) => api.delete(`/quizzes/${id}`),
   getQuizById: (id: number) => api.get(`/quizzes/${id}`),
-  submitQuiz: (quizId: number, answers: any) => api.post(`/quizzes/${quizId}/submit`, answers),
+  getQuizQuestions: (quizId: number) => api.get(`/quizzes/${quizId}/questions`),
+  addQuestion: (quizId: number, questionData: any) => api.post(`/quizzes/${quizId}/questions`, questionData),
+  startQuizAttempt: (quizId: number, studentId: number) => api.post(`/quizzes/${quizId}/start?studentId=${studentId}`),
+  submitQuizAttempt: (attemptId: number, answers: any) => api.post(`/quizzes/attempts/${attemptId}/submit`, answers),
   getQuizResults: (quizId: number) => api.get(`/quizzes/${quizId}/results`),
+  getMyAttempts: (quizId: number) => api.get(`/quizzes/${quizId}/my-attempts`),
 };
 
 // Attendance API
 export const attendanceAPI = {
   markAttendance: (data: any) => api.post('/attendance/mark', data),
+  markMultipleAttendance: (data: any) => api.post('/attendance/mark-multiple', data),
   getCourseAttendance: (courseId: number) => api.get(`/attendance/course/${courseId}`),
   getStudentAttendance: (studentId: number) => api.get(`/attendance/student/${studentId}`),
+  getStudentCourseAttendance: (studentId: number, courseId: number) => 
+    api.get(`/attendance/student/${studentId}/course/${courseId}`),
+  getAttendanceRate: (studentId: number, courseId: number) => 
+    api.get(`/attendance/student/${studentId}/course/${courseId}/rate`),
   getMyAttendance: () => api.get('/attendance/my-attendance'),
+  getAttendanceByDate: (courseId: number, date: string) => 
+    api.get(`/attendance/course/${courseId}/date/${date}`),
+};
+
+// Course Materials API
+export const courseMaterialAPI = {
+  createMaterial: (materialData: any, courseId: number) => 
+    api.post(`/materials?courseId=${courseId}`, materialData),
+  getMaterialsByCourse: (courseId: number) => api.get(`/materials/course/${courseId}`),
+  getMaterialsByInstructor: (instructorId: number) => api.get(`/materials/instructor/${instructorId}`),
+  getMaterialById: (id: number) => api.get(`/materials/${id}`),
+  updateMaterial: (id: number, materialData: any) => api.put(`/materials/${id}`, materialData),
+  deleteMaterial: (id: number) => api.delete(`/materials/${id}`),
 };
 
 export default api;
