@@ -36,8 +36,10 @@ public class CourseMaterialService {
         
         activityLogService.logActivity(
             "MATERIAL_UPLOADED",
-            "Uploaded material: " + material.getTitle() + " for course: " + course.getName(),
-            user.getId()
+            "Uploaded material: " + material.getTitle() + " for course: " + course.getCourseName(),
+            user,
+            "COURSE_MATERIAL",
+            saved.getId()
         );
         
         return saved;
@@ -76,10 +78,15 @@ public class CourseMaterialService {
         CourseMaterial material = getMaterialById(id);
         courseMaterialRepository.delete(material);
         
+        User user = userRepository.findById(material.getUploadedBy().getId())
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
         activityLogService.logActivity(
             "MATERIAL_DELETED",
             "Deleted material: " + material.getTitle(),
-            material.getUploadedBy().getId()
+            user,
+            "COURSE_MATERIAL",
+            material.getId()
         );
     }
 }

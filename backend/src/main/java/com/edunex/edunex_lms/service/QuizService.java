@@ -201,7 +201,6 @@ public class QuizService {
         quiz.setPassingMarks(quizDetails.getPassingMarks());
         quiz.setStartTime(quizDetails.getStartTime());
         quiz.setEndTime(quizDetails.getEndTime());
-        quiz.setDueDate(quizDetails.getDueDate());
         
         return quizRepository.save(quiz);
     }
