@@ -62,22 +62,29 @@ public class AssignmentService {
         Assignment assignment = assignmentRepository.findById(assignmentId)
             .orElseThrow(() -> new RuntimeException("Assignment not found"));
         
+        // Get the student
+        User student = userRepository.findById(studentId)
+            .orElseThrow(() -> new RuntimeException("Student not found"));
+        
+        // Set student on the assignment
+        assignment.setStudent(student);
+        
         if (LocalDateTime.now().isAfter(assignment.getDueDate())) {
             assignment.setStatus(Assignment.SubmissionStatus.LATE_SUBMISSION);
         } else {
             assignment.setStatus(Assignment.SubmissionStatus.SUBMITTED);
         }
         
-        // Save file
-        String fileName = saveFile(file, assignmentId, studentId);
-        assignment.setSubmissionUrl(fileName);
+        // Save file if provided
+        if (file != null && !file.isEmpty()) {
+            String fileName = saveFile(file, assignmentId, studentId);
+            assignment.setSubmissionUrl(fileName);
+        }
         assignment.setSubmittedAt(LocalDateTime.now());
         
         Assignment saved = assignmentRepository.save(assignment);
         
         // Log activity
-        User student = userRepository.findById(studentId)
-            .orElseThrow(() -> new RuntimeException("Student not found"));
         activityLogService.logActivity(
             "ASSIGNMENT_SUBMITTED",
             "Assignment submitted: " + assignment.getTitle() + " by " + student.getFullName(),
@@ -177,5 +184,40 @@ public class AssignmentService {
             // Admin gets all assignments
             return assignmentRepository.findAll();
         }
+    }
+    
+    @Transactional(readOnly = true)
+    public List<Assignment> getAssignmentSubmissions(Long assignmentId) {
+        // Find the original assignment to verify it exists
+        Assignment assignment = assignmentRepository.findById(assignmentId)
+            .orElseThrow(() -> new RuntimeException("Assignment not found"));
+        
+        // Find all submissions (assignments with the same base assignment but different students)
+        // In this schema, submissions are stored as separate Assignment records with student_id set
+        List<Assignment> submissions = assignmentRepository.findByCourseIdAndTitleAndStudentIsNotNull(
+            assignment.getCourse().getId(), 
+            assignment.getTitle()
+        );
+        
+        return submissions;
+    }
+    
+    @Transactional(readOnly = true)
+    public List<Assignment> getCourseAssignmentSubmissions(Long courseId, String title) {
+        return assignmentRepository.findByCourseIdAndTitleAndStudentIsNotNull(courseId, title);
+    }
+    
+    @Transactional
+    public void deleteAssignment(Long assignmentId) {
+        Assignment assignment = assignmentRepository.findById(assignmentId)
+            .orElseThrow(() -> new RuntimeException("Assignment not found"));
+        
+        // Log activity
+        activityLogService.logActivity(
+            "ASSIGNMENT_DELETED",
+            "Assignment '" + assignment.getTitle() + "' was deleted"
+        );
+        
+        assignmentRepository.delete(assignment);
     }
 }

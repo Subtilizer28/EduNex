@@ -2,6 +2,7 @@ package com.edunex.edunex_lms.controller;
 
 import com.edunex.edunex_lms.entity.Assignment;
 import com.edunex.edunex_lms.entity.User;
+import com.edunex.edunex_lms.security.UserDetailsImpl;
 import com.edunex.edunex_lms.service.AssignmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -32,11 +33,11 @@ public class AssignmentController {
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<Assignment> submitAssignment(
             @PathVariable Long id,
-            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "file", required = false) MultipartFile file,
             @AuthenticationPrincipal UserDetails userDetails) {
         // Get student ID from authenticated user
-        User student = (User) userDetails;
-        Assignment submitted = assignmentService.submitAssignment(id, student.getId(), file);
+        UserDetailsImpl userDetailsImpl = (UserDetailsImpl) userDetails;
+        Assignment submitted = assignmentService.submitAssignment(id, userDetailsImpl.getId(), file);
         return ResponseEntity.ok(submitted);
     }
     
@@ -86,5 +87,30 @@ public class AssignmentController {
         // For instructors: assignments from their courses
         List<Assignment> assignments = assignmentService.getUserAssignments(userDetails.getUsername());
         return ResponseEntity.ok(assignments);
+    }
+    
+    @GetMapping("/{assignmentId}/submissions")
+    @PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")
+    public ResponseEntity<List<Assignment>> getAssignmentSubmissions(@PathVariable Long assignmentId) {
+        // Return all submissions for a specific assignment
+        List<Assignment> submissions = assignmentService.getAssignmentSubmissions(assignmentId);
+        return ResponseEntity.ok(submissions);
+    }
+    
+    @GetMapping("/course/{courseId}/submissions")
+    @PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<Assignment>> getCourseAssignmentSubmissions(
+            @PathVariable Long courseId,
+            @RequestParam String title) {
+        List<Assignment> submissions = assignmentService.getCourseAssignmentSubmissions(courseId, title);
+        return ResponseEntity.ok(submissions);
+    }
+    
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('INSTRUCTOR', 'ADMIN')")
+    public ResponseEntity<Void> deleteAssignment(@PathVariable Long id) {
+        assignmentService.deleteAssignment(id);
+        return ResponseEntity.ok().build();
     }
 }

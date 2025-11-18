@@ -10,7 +10,6 @@ import com.edunex.edunex_lms.repository.AssignmentRepository;
 import com.edunex.edunex_lms.repository.AttendanceRepository;
 import com.edunex.edunex_lms.repository.CourseRepository;
 import com.edunex.edunex_lms.repository.EnrollmentRepository;
-import com.edunex.edunex_lms.repository.QuizRepository;
 import com.edunex.edunex_lms.repository.UserRepository;
 import com.edunex.edunex_lms.service.ActivityLogService;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +36,6 @@ public class AdminController {
     private final CourseRepository courseRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final AssignmentRepository assignmentRepository;
-    private final QuizRepository quizRepository;
     private final AttendanceRepository attendanceRepository;
     private final PasswordEncoder passwordEncoder;
     private final ActivityLogService activityLogService;
@@ -197,7 +195,6 @@ public class AdminController {
         long totalCourses = courseRepository.count();
         long totalEnrollments = enrollmentRepository.count();
         long totalAssignments = assignmentRepository.count();
-        long totalQuizzes = quizRepository.count();
         
         Map<String, Object> stats = new HashMap<>();
         stats.put("totalUsers", totalUsers);
@@ -207,7 +204,6 @@ public class AdminController {
         stats.put("totalCourses", totalCourses);
         stats.put("totalEnrollments", totalEnrollments);
         stats.put("totalAssignments", totalAssignments);
-        stats.put("totalQuizzes", totalQuizzes);
         
         return ResponseEntity.ok(stats);
     }
@@ -662,11 +658,9 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, Object>> getAssignmentAnalyticsReport() {
         long totalAssignments = assignmentRepository.count();
-        long totalQuizzes = quizRepository.count();
         
         Map<String, Object> report = new HashMap<>();
         report.put("totalAssignments", totalAssignments);
-        report.put("totalQuizzes", totalQuizzes);
         report.put("generatedAt", java.time.LocalDateTime.now());
         
         return ResponseEntity.ok(report);

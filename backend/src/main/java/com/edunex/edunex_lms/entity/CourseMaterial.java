@@ -1,5 +1,6 @@
 package com.edunex.edunex_lms.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -34,10 +35,12 @@ public class CourseMaterial {
     
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "course_id", nullable = false)
+    @JsonIgnoreProperties({"instructor", "enrollments", "materials", "quizzes", "assignments", "attendance"})
     private Course course;
     
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "uploaded_by")
+    @JsonIgnoreProperties({"password", "enrollments", "instructedCourses"})
     private User uploadedBy;
     
     @CreationTimestamp

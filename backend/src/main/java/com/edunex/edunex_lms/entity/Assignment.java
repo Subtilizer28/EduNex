@@ -1,5 +1,6 @@
 package com.edunex.edunex_lms.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -23,6 +24,7 @@ public class Assignment {
     
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "course_id", nullable = false)
+    @JsonIgnoreProperties({"instructor", "enrollments", "materials", "quizzes", "assignments", "attendance"})
     private Course course;
     
     @NotBlank(message = "Assignment title is required")
@@ -42,8 +44,9 @@ public class Assignment {
     private String attachmentUrl;
     
     // Student submission fields
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "student_id")
+    @JsonIgnoreProperties({"password", "enrollments", "instructedCourses"})
     private User student;
     
     @Column(length = 500)

@@ -23,28 +23,33 @@ public class AttendanceService {
     
     @Transactional
     public Attendance markAttendance(Long studentId, Long courseId, String status) {
-        return markAttendance(studentId, courseId, status, null, null);
+        return markAttendance(studentId, courseId, status, null, null, null);
     }
     
     @Transactional
     public Attendance markAttendance(Long studentId, Long courseId, String status, String remarks, Long markedById) {
+        return markAttendance(studentId, courseId, status, remarks, markedById, null);
+    }
+    
+    @Transactional
+    public Attendance markAttendance(Long studentId, Long courseId, String status, String remarks, Long markedById, LocalDate date) {
         User student = userRepository.findById(studentId)
             .orElseThrow(() -> new RuntimeException("Student not found"));
         
         Course course = courseRepository.findById(courseId)
             .orElseThrow(() -> new RuntimeException("Course not found"));
         
-        LocalDate today = LocalDate.now();
+        LocalDate attendanceDate = date != null ? date : LocalDate.now();
         
-        // Check if attendance already marked today
-        if (attendanceRepository.findByStudentIdAndCourseIdAndAttendanceDate(studentId, courseId, today).isPresent()) {
-            throw new RuntimeException("Attendance already marked for today");
+        // Check if attendance already marked for this date
+        if (attendanceRepository.findByStudentIdAndCourseIdAndAttendanceDate(studentId, courseId, attendanceDate).isPresent()) {
+            throw new RuntimeException("Attendance already marked for this date");
         }
         
         Attendance attendance = new Attendance();
         attendance.setStudent(student);
         attendance.setCourse(course);
-        attendance.setAttendanceDate(today);
+        attendance.setAttendanceDate(attendanceDate);
         attendance.setStatus(Attendance.AttendanceStatus.valueOf(status.toUpperCase()));
         attendance.setRemarks(remarks);
         

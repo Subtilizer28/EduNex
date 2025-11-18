@@ -54,8 +54,10 @@ public class AttendanceController {
             Long studentId = Long.valueOf(item.get("studentId").toString());
             String status = item.get("status").toString();
             String remarks = item.get("remarks") != null ? item.get("remarks").toString() : null;
+            String dateStr = item.get("date") != null ? item.get("date").toString() : null;
+            LocalDate date = dateStr != null ? LocalDate.parse(dateStr) : null;
             
-            attendanceService.markAttendance(studentId, courseId, status, remarks, markedById);
+            attendanceService.markAttendance(studentId, courseId, status, remarks, markedById, date);
         }
         
         return ResponseEntity.ok(Map.of("message", "Attendance marked successfully"));

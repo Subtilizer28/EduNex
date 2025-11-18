@@ -31,4 +31,6 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
     List<Assignment> findOverdueAssignments(Long courseId, LocalDateTime now);
     
     Optional<Assignment> findByIdAndStudentId(Long id, Long studentId);
+    
+    List<Assignment> findByCourseIdAndTitleAndStudentIsNotNull(Long courseId, String title);
 }

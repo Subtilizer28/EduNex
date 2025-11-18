@@ -2,6 +2,7 @@ package com.edunex.edunex_lms.controller;
 
 import com.edunex.edunex_lms.entity.CourseMaterial;
 import com.edunex.edunex_lms.entity.User;
+import com.edunex.edunex_lms.security.UserDetailsImpl;
 import com.edunex.edunex_lms.service.CourseMaterialService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,8 +26,8 @@ public class CourseMaterialController {
             @RequestBody CourseMaterial material,
             @RequestParam Long courseId,
             @AuthenticationPrincipal UserDetails userDetails) {
-        User user = (User) userDetails;
-        CourseMaterial created = courseMaterialService.createMaterial(material, courseId, user.getId());
+        UserDetailsImpl userDetailsImpl = (UserDetailsImpl) userDetails;
+        CourseMaterial created = courseMaterialService.createMaterial(material, courseId, userDetailsImpl.getId());
         return ResponseEntity.ok(created);
     }
     
