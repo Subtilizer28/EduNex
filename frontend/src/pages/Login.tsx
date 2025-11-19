@@ -176,13 +176,6 @@ const Login = () => {
               )}
             </Button>
           </form>
-
-          <div className="mt-6 space-y-2 rounded-lg bg-muted p-4 text-xs">
-            <p className="font-semibold">Demo Credentials:</p>
-            <p>Admin: admin / password123</p>
-            <p>Instructor: instructor / password123</p>
-            <p>Student: student / password123</p>
-          </div>
         </CardContent>
       </Card>
     </div>
